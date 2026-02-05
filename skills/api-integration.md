@@ -6,11 +6,40 @@
 
 ---
 
-## 사용 시점
+## 트리거 조건
+
+### 키워드 (하나 이상 포함 시 트리거)
+`연동`, `통합`, `integration`, `외부 API`, `Stripe`, `결제`, `OpenAI`, `webhook`, `SDK`, `서드파티`
+
+### 판별 규칙
+다음 조건 중 하나 이상 만족 시 트리거:
+1. 외부 서비스명이 명시됨 (Stripe, AWS S3, OpenAI, 카카오 등)
+2. "연동", "통합", "integration" 키워드 + 외부 서비스 언급
+3. Webhook 수신/처리 필요
+
+### 예시 요청
 - "Stripe 결제 연동해줘"
-- "Google 로그인 추가해줘"
-- "외부 API 연동해줘"
 - "OpenAI API 통합해줘"
+- "외부 API 연동해줘"
+- "S3 이미지 업로드 추가해줘"
+
+### 트리거하지 않는 경우
+- 소셜 로그인 (Google, GitHub 로그인) → auth-flow 스킬
+- 내부 API 엔드포인트 구현 → crud-feature 또는 autopilot
+- 외부 API 문서 조사만 → researcher 에이전트 직접 호출
+
+### 전제 조건
+- 연동 대상 서비스가 특정되어야 함 (없으면 질문)
+- tech-stack.md에 Backend가 정의되어 있어야 함
+- API 키/인증 정보 관리 방법 확인 필요 (.env)
+
+### 파라미터 추출
+| 파라미터 | 추출 방법 | 기본값 |
+|----------|-----------|--------|
+| 서비스명 | 요청에서 고유명사 추출 (Stripe, OpenAI 등) | 필수 - 없으면 질문 |
+| 기능 범위 | "결제", "이미지 업로드", "채팅" 등 | researcher가 조사 |
+| SDK 사용 | "공식 SDK", "REST 직접" 언급 | SDK 우선 |
+| Webhook | "webhook", "콜백" 언급 | researcher가 판단 |
 
 ---
 
