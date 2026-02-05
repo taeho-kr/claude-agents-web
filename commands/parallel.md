@@ -45,17 +45,19 @@ parallel LoginForm 구현 | /auth/login API 구현 | users 테이블 수정
 ### 파일 범위 분리 (필수)
 
 병렬 실행 전, 오케스트레이터가 각 에이전트의 수정 가능 파일 범위를 확인합니다.
+planner의 작업 계획(plans/current.md)에 명시된 파일 범위를 기준으로 합니다.
 
+**기본 원칙:**
 ```
-[frontend] src/components/**, src/app/**/page.tsx, src/hooks/**, src/styles/**
-[backend]  src/app/api/**, src/lib/server/**, src/services/**
-[dba]      prisma/**, src/lib/db/**
-[ai-server] src/lib/ai/**, src/services/ai/**
+[frontend] UI 컴포넌트, 페이지, 훅, 스타일 파일
+[backend]  API 라우트, 서비스, 미들웨어 파일
+[dba]      스키마, 마이그레이션, DB 유틸 파일
+[ai-server] ML 서비스, 모델 관련 파일
 ```
 
 **공유 파일 (병렬 금지)**:
 ```
-src/types/**, src/lib/shared/**, package.json, .env*
+타입 정의, 공유 유틸, 패키지 설정, 환경변수 등
 → 한 에이전트가 먼저 수정한 후 다음 에이전트 실행
 ```
 
@@ -105,3 +107,18 @@ index.ts에 A 함수와 B 함수 추가해줘
 
 ### 총 소요 시간: 2.5s (순차 실행시 5.3s)
 ```
+
+---
+
+## 에러 처리
+
+### 부분 실패
+```
+parallel 중 일부 에이전트만 실패:
+  → 성공한 에이전트 결과는 유지
+  → 실패한 에이전트만 재시도 (최대 2회)
+  → 재시도 실패 시 → 사용자에게 보고
+```
+
+### 에러 복구
+실패 유형별 상세 절차: `references/error-recovery.md`

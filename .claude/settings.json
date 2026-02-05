@@ -55,10 +55,5 @@
       "review",
       "integration-test"
     ]
-  },
-  "preferences": {
-    "auto_apply_threshold": 0.8,
-    "remind_threshold": 0.4,
-    "ask_threshold": 0.0
   }
 }

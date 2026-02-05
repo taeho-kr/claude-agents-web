@@ -38,7 +38,11 @@
 
 ## 출력
 
-`.omc/plans/current.md`에 작성:
+`.omc/plans/current.md`에 작성합니다.
+
+**재호출 시 (architect 피드백 등):**
+기존 계획을 `.omc/plans/current.v{N}.md`로 백업한 후 새 계획을 작성합니다.
+새 계획 상단에 변경 사유와 이전 버전과의 차이를 요약합니다.
 
 ```markdown
 # 작업 계획: [제목]
@@ -61,6 +65,18 @@
 
 ## 의존성 그래프
 Phase 1 → Phase 2 → Phase 3
+
+## 파일 영향 범위 (병렬 안전)
+<!-- 각 에이전트가 수정할 파일/디렉토리를 명시. 겹침이 있으면 순차 실행 필요 -->
+| 에이전트 | 수정 파일 범위 | 비고 |
+|----------|---------------|------|
+| frontend | src/components/LoginForm/**, src/app/login/page.tsx | |
+| backend | src/app/api/auth/**, src/services/auth.service.ts | |
+| dba | prisma/schema.prisma, prisma/migrations/** | Phase 1에서 먼저 실행 |
+
+### 공유 파일 (순차 실행 필요)
+- src/types/user.ts → dba 완료 후 backend이 수정
+- 없으면 "공유 파일 없음 - 병렬 실행 가능" 명시
 
 ## 예상 에이전트
 - frontend: 2개 작업
@@ -123,3 +139,5 @@ Phase 1 → Phase 2 → Phase 3
 - [ ] 담당 에이전트가 명시되었는가?
 - [ ] 병렬/순차가 올바르게 표시되었는가?
 - [ ] 검증 단계가 포함되었는가?
+- [ ] **파일 영향 범위**가 에이전트별로 명시되었는가?
+- [ ] 공유 파일이 있으면 순차 실행으로 표시했는가?

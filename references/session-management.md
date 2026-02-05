@@ -4,25 +4,21 @@
 
 ---
 
-## 세션 메모 관리
+## 세션 상태 관리
 
-### .omc/notepads/session.md
+### .omc/workflow-state.md (워크플로우 실행 중)
 
-세션 중 발생하는 모든 주요 이벤트를 기록합니다.
+에이전트 위임 워크플로우 실행 중 상태를 추적합니다.
+포맷: `references/output-contracts.md`의 workflow-state 섹션 참조.
 
-**기록 형식:**
-```markdown
-## [HH:MM] [에이전트] 작업명
-- 결과: 성공/실패
-- 생성 파일: path1, path2
-- 변경 파일: path3
-- 참고: 특이사항
-```
+- 워크플로우 시작 시 생성, 종료 시 삭제
+- Phase 진행, 에이전트 호출 기록, 재시도 카운터, 비용 가드 포함
+- 세션이 끊어져도 이 파일로 워크플로우 복원 가능
 
-**크기 관리:**
-- 50줄 초과 시 → 완료된 작업은 요약으로 압축
-- 압축 형식: `✅ [에이전트] 작업명 (생성: N파일, 변경: N파일)`
-- 진행 중/실패 항목은 압축하지 않음
+### 에이전트별 작업 기록 (.omc/notepads/{agent}.md)
+
+각 구현 에이전트는 자신의 이름으로 notepad에 작업 결과를 기록합니다.
+포맷: `references/output-contracts.md`의 구현 에이전트 공통 형식 참조.
 
 ---
 
@@ -62,7 +58,7 @@ autopilot으로 여러 기능을 순차 구현할 때:
 ```
 기능 A 완료
   → project-state.md 업데이트 (A 완료 기록)
-  → session.md에 A 결과 요약 추가
+  → workflow-state.md 삭제 또는 완료 표시
 
 기능 B 시작
   → project-state.md 읽기 (A 완료 확인)

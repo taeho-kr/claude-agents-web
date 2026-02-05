@@ -144,3 +144,25 @@ compose backend:API 구현
 | 에이전트 | 자동 할당 | 직접 지정 |
 | 검증 | 별도 | 파이프라인에 포함 |
 | 유연성 | 낮음 | 높음 |
+
+---
+
+## 에러 처리
+
+### 에이전트 실패 시
+```
+Step N에서 에이전트 실패:
+  → references/error-recovery.md 절차 따름
+  → 같은 Step 재시도 (최대 2회)
+  → 2회 실패 시 → 사용자에게 보고, 파이프라인 중단
+```
+
+### 병렬 Step 내 부분 실패
+```
+Step 2: [frontend, backend] 중 backend만 실패:
+  → frontend 결과는 유지
+  → backend만 재시도
+  → 재시도 실패 시 → 사용자에게 보고
+```
+
+compose도 구현 에이전트가 포함된 경우 workflow-state.md를 생성합니다.

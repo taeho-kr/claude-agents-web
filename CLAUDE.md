@@ -106,16 +106,50 @@
 3. Read(".omc/context/conventions.md")     → 코딩 컨벤션
 4. Read(".omc/context/preferences.md")     → 사용자 선호도
 5. 드리프트 감지 (프로젝트 코드가 존재하는 경우):
-   - package.json 의존성 vs tech-stack.md 비교
-   - 프로젝트 디렉토리 구조 vs conventions.md 비교
-   - 불일치 발견 시 → 사용자에게 보고 + PM 업데이트 제안
+   - 패키지 매니저 파일(package.json, pyproject.toml 등) 읽기
+   - tech-stack.md의 "주요 라이브러리" 목록과 실제 dependencies 비교
+     - 실제에 있지만 tech-stack.md에 없는 주요 라이브러리 → 추가 필요
+     - tech-stack.md에 있지만 실제에 없는 라이브러리 → 제거 또는 확인
+     - devDependencies는 검사하지 않음 (린터, 테스트 도구 등)
+   - 불일치 발견 시 → 사용자에게 보고 + Persistent Context 업데이트 제안
 6. Read(".omc/workflow-state.md") 존재 시:
    - 이전 세션의 미완료 워크플로우 복원
    - 마지막 Phase부터 재개 가능
 ```
 
-- 템플릿 상태 → 프로젝트 초기 설정 단계로 판단
+- 템플릿 상태 → 아래 **초기 설정 절차** 실행
 - 내용 있음 → 기존 컨텍스트 위에서 작업 시작 (반복 질문 불필요)
+
+### 초기 설정 절차 (Persistent Context가 템플릿 상태일 때)
+
+프로젝트에 처음 적용되거나 `.omc/context/` 파일이 비어있을 때 실행합니다.
+
+```
+1. 프로젝트 자동 감지:
+   - package.json, pyproject.toml, go.mod 등 → 언어/프레임워크 파악
+   - 디렉토리 구조 → 아키텍처 패턴 파악 (monorepo, feature-based 등)
+   - 기존 설정 파일 → 빌드 도구, 린터, 포맷터 파악
+
+2. 사용자 확인 (AskUserQuestion):
+   - 감지된 기술 스택이 맞는지 확인
+   - 선호하는 코딩 스타일/컨벤션 질문
+   - 프로젝트 현재 상태 (신규/진행중/리팩토링) 확인
+
+3. Persistent Context 초기 작성:
+   - tech-stack.md     ← 감지 결과 + 사용자 확인
+   - conventions.md    ← 기존 코드 패턴 + 사용자 선호
+   - preferences.md    ← 사용자 답변에서 추출
+   - project-state.md  ← 현재 진행 상태 기록
+
+4. 작성 예시 참조: references/persistent-memory-examples.md
+```
+
+기존 프로젝트가 없는 빈 디렉토리인 경우:
+```
+1. 프로젝트 목적 질문 (웹 앱, API, 풀스택 등)
+2. 기술 스택 선택 (사용자에게 옵션 제시)
+3. 프로젝트 스캐폴딩 후 Persistent Context 작성
+```
 
 ---
 
@@ -124,10 +158,11 @@
 ```
 1. Persistent Context 로드 (.omc/context/ persistent 파일)
 2. 에이전트 프롬프트 로드 (agents/{name}.md)
-3. Task 생성:
-   - prompt: 에이전트 프롬프트 + Persistent Context + 작업 지시
+3. 공통 규칙 로드 (agents/_common.md)
+4. Task 생성:
+   - prompt: 에이전트 프롬프트 + 공통 규칙 + Persistent Context + 작업 지시
    - 산출물 포맷: references/output-contracts.md 준수 지시
-4. 병렬 실행: 독립 작업은 하나의 메시지에서 여러 Task 동시 호출
+5. 병렬 실행: 독립 작업은 하나의 메시지에서 여러 Task 동시 호출
 ```
 
 ### Task 템플릿
@@ -137,6 +172,10 @@ Task({
   max_turns: /* 분석:15, 구현:25, 검증:10 */,
   prompt: `
 ${에이전트 프롬프트}
+
+---
+## 공통 규칙
+${agents/_common.md 내용}
 
 ---
 ## Persistent Context
@@ -289,7 +328,17 @@ Phase 실패 → git diff로 변경 확인 → git restore로 롤백 가능
 ### 병렬 실행 안전 정책
 
 병렬 에이전트에게 **수정 가능 파일 범위**를 명시합니다.
+파일 범위는 **planner의 작업 계획 (plans/current.md)** 에서 결정됩니다.
 
+#### 기본 범위 가이드 (프로젝트 구조에 맞게 조정)
+```
+[frontend] UI 컴포넌트, 페이지, 훅, 스타일 파일
+[backend]  API 라우트, 서비스, 미들웨어 파일
+[dba]      스키마, 마이그레이션, DB 유틸 파일
+[ai-server] ML 서비스, 모델 관련 파일
+```
+
+**Next.js 프로젝트 예시:**
 ```
 [frontend] src/components/**, src/app/**/page.tsx, src/hooks/**, src/styles/**
 [backend]  src/app/api/**, src/lib/server/**, src/services/**
@@ -299,11 +348,11 @@ Phase 실패 → git diff로 변경 확인 → git restore로 롤백 가능
 
 **공유 파일** (양쪽 모두 수정 가능성):
 ```
-src/types/**, src/lib/shared/**, package.json, .env*
+타입 정의, 공유 유틸, 패키지 설정, 환경변수 등
 → 공유 파일은 병렬 금지. 한 에이전트가 먼저 수정 후 다음 에이전트 실행.
 ```
 
-planner가 작업 계획 시 파일 영향 범위를 명시하고, 겹침이 있으면 순차 실행으로 전환.
+planner가 작업 계획 시 **에이전트별 파일 영향 범위를 반드시 명시**하고, 겹침이 있으면 순차 실행으로 전환.
 
 ---
 
@@ -359,7 +408,7 @@ planner가 작업 계획 시 파일 영향 범위를 명시하고, 겹침이 있
 ## 주의사항
 
 1. **Persistent Context 로드**: 작업 시작 시 `.omc/context/` 로드 + 드리프트 감지
-2. **프롬프트 로드 필수**: 에이전트 호출 전 `agents/{name}.md` 읽기
+2. **프롬프트 로드 필수**: 에이전트 호출 전 `agents/{name}.md` + `agents/_common.md` 읽기
 3. **산출물 포맷 준수**: `references/output-contracts.md` 포맷 지시
 4. **워크플로우 상태 기록**: 에이전트 위임 시 `.omc/workflow-state.md` 유지
 5. **Phase별 git checkpoint**: Phase 완료마다 자동 커밋, 실패 시 롤백
