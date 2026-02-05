@@ -1,0 +1,7 @@
+# Decisions Directory
+# 주요 결정 사항 (architect, code-reviewer 작성)
+#
+# 예시 파일:
+# - architecture.md: 아키텍처 결정
+# - review.md: 코드 리뷰 결과
+# - security.md: 보안 관련 결정

@@ -28,7 +28,9 @@
       "plans": "작업 계획 (planner 작성)",
       "notepads": "작업 메모 (append 전용)",
       "decisions": "결정 사항 기록",
-      "context": "프로젝트 컨텍스트"
+      "context": "프로젝트 컨텍스트",
+      "artifacts": "산출물 (PRD, 디자인 스펙)",
+      "reports": "분석 보고서"
     }
   },
   "skills": {
@@ -44,7 +46,8 @@
     "available": [
       "autopilot",
       "parallel",
-      "review"
+      "review",
+      "integration-test"
     ]
   },
   "preferences": {

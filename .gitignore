@@ -1,10 +1,21 @@
 # Local settings
 .claude/settings.local.json
 
-# Shared Memory (세션별 데이터)
-.omc/notepads/
-.omc/plans/
-.omc/context/
+# Shared Memory - 세션별 데이터는 무시, .gitkeep은 유지
+.omc/plans/*
+!.omc/plans/.gitkeep
+
+.omc/notepads/*
+!.omc/notepads/.gitkeep
+
+.omc/context/*
+!.omc/context/.gitkeep
+
+.omc/decisions/*
+!.omc/decisions/.gitkeep
+
+.omc/artifacts/*
+!.omc/artifacts/.gitkeep
 
 # 보고서는 유지
 !.omc/reports/
@@ -23,8 +34,15 @@ Thumbs.db
 node_modules/
 .env
 .env.local
+.env.test
 
 # Python (프로젝트 생성시)
 __pycache__/
 *.pyc
 .venv/
+
+# Test artifacts
+coverage/
+.nyc_output/
+playwright-report/
+test-results/
