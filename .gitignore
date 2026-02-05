@@ -9,6 +9,7 @@
 !.omc/notepads/.gitkeep
 
 .omc/context/codebase.md
+.omc/workflow-state.md
 
 # Persistent Context는 git 추적 (세션 간 유지)
 # preferences.md, tech-stack.md, conventions.md, project-state.md
