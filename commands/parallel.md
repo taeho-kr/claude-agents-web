@@ -40,7 +40,24 @@ parallel LoginForm 구현 | /auth/login API 구현 | users 테이블 수정
 
 ---
 
-## 주의사항
+## 안전 정책
+
+### 파일 범위 분리 (필수)
+
+병렬 실행 전, 오케스트레이터가 각 에이전트의 수정 가능 파일 범위를 확인합니다.
+
+```
+[frontend] src/components/**, src/app/**/page.tsx, src/hooks/**, src/styles/**
+[backend]  src/app/api/**, src/lib/server/**, src/services/**
+[dba]      prisma/**, src/lib/db/**
+[ai-server] src/lib/ai/**, src/services/ai/**
+```
+
+**공유 파일 (병렬 금지)**:
+```
+src/types/**, src/lib/shared/**, package.json, .env*
+→ 한 에이전트가 먼저 수정한 후 다음 에이전트 실행
+```
 
 ### 의존성 있는 작업
 의존성이 있으면 parallel 대신 순차 실행:
@@ -61,6 +78,11 @@ parallel index.ts에 A 함수 추가 | index.ts에 B 함수 추가
 # ✅ 순차 실행 필요
 index.ts에 A 함수와 B 함수 추가해줘
 ```
+
+### 충돌 감지 (사후)
+병렬 완료 후 오케스트레이터가 `git diff`로 변경 파일 확인:
+- 예상 범위 밖 파일이 수정됨 → 사용자에게 경고
+- 같은 파일이 여러 에이전트에 의해 수정됨 → 수동 확인 요청
 
 ---
 

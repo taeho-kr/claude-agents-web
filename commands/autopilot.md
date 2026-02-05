@@ -23,50 +23,77 @@ autopilot --skip-design 버그 수정해줘
 
 ## 워크플로우
 
+> 각 Phase 완료 시 `.omc/workflow-state.md`를 업데이트합니다.
+
+### 시작 전
+```
+1. .omc/workflow-state.md 생성 (명령, 요청 요약, Phase 목록)
+2. Persistent Context 로드 + 드리프트 감지
+```
+
 ### Phase 0: 기획 (선택)
 > `--with-prd` 옵션 사용시 실행
 
 ```
 [pm] PRD 작성, 기능 명세, 우선순위 정의
      → .omc/artifacts/prd.md
+→ git commit "[autopilot] Phase 0: 기획 완료"
+→ workflow-state.md 업데이트 (Phase 0 완료, commit 해시 기록)
 ```
 
 ### Phase 1: 분석
 ```
-[researcher] 코드베이스 분석
+[researcher] 코드베이스 분석 (max_turns: 15)
              → .omc/context/codebase.md
-[analyst]    요구사항 도출, 엣지케이스 식별
+[analyst]    요구사항 도출, 엣지케이스 식별 (max_turns: 15)
              → .omc/notepads/requirements.md
+→ git commit "[autopilot] Phase 1: 분석 완료"
+→ workflow-state.md 업데이트
 ```
 
 ### Phase 2: 설계
 ```
-[planner]  작업 계획 수립, 의존성 분석
+[planner]  작업 계획 수립, 의존성 분석 (max_turns: 15)
            → .omc/plans/current.md
-[designer] UI/UX 스펙 정의 (UI 작업시)
+           ⚠️ planner는 파일 영향 범위를 명시해야 함 (병렬 안전)
+[designer] UI/UX 스펙 정의 (UI 작업시) (max_turns: 15)
            → .omc/artifacts/design-spec.md
+→ git commit "[autopilot] Phase 2: 설계 완료"
+→ workflow-state.md 업데이트
 ```
 
 ### Phase 3: 구현
 ```
-[dba]       DB 스키마, 마이그레이션 (먼저 실행)
-[parallel]  독립 작업 병렬 실행:
-            ├── [frontend]  UI 컴포넌트
-            ├── [backend]   API, 비즈니스 로직
-            └── [ai-server] ML 기능 (해당시)
+[dba]       DB 스키마, 마이그레이션 (먼저 실행) (max_turns: 25)
+[parallel]  독립 작업 병렬 실행 (파일 범위 겹침 없을 때만):
+            ├── [frontend]  UI 컴포넌트 (max_turns: 25)
+            ├── [backend]   API, 비즈니스 로직 (max_turns: 25)
+            └── [ai-server] ML 기능 (해당시) (max_turns: 25)
+            ⚠️ 공유 파일(types, shared, package.json) 수정 시 순차 실행
+→ git commit "[autopilot] Phase 3: 구현 완료"
+→ workflow-state.md 업데이트
 ```
 
-### Phase 4: 검증
+### Phase 4: 검증 + 피드백 루프
 ```
-[unit-tester]   유닛 테스트 ⚡ 자동 실행
-[code-reviewer] 코드 품질, 보안 검토
-[architect]     아키텍처 검토 (대규모 변경시)
+[unit-tester]   유닛 테스트 ⚡ 자동 실행 (max_turns: 10)
+[code-reviewer] 코드 품질, 보안 검토 (max_turns: 10)
+[architect]     아키텍처 검토 (대규모 변경시) (max_turns: 10)
+
+FAIL 시:
+  → workflow-state.md 재시도 카운터 증가
+  → 피드백 + 구현 에이전트 재호출
+  → 재검증
+  → 2회 실패 시 → 사용자 보고 (workflow-state.md에 기록)
 ```
 
-### Phase 5: 반복/완료
+### Phase 5: 완료
 ```
-검증 실패 → 해당 Phase 재실행 (최대 2회)
-모든 검증 통과 → 완료 보고
+모든 검증 통과:
+  → git commit "[autopilot] 완료: {기능 요약}"
+  → project-state.md 업데이트
+  → workflow-state.md 삭제
+  → 완료 보고
 ```
 
 ---
@@ -134,12 +161,13 @@ autopilot --verbose 복잡한 기능 구현
 
 ## 중단 조건
 
-| 조건 | 행동 |
-|------|------|
-| 3회 연속 같은 오류 | 사용자에게 질문 |
-| 요구사항 불명확 | 사용자에게 질문 |
-| Critical 보안 이슈 | 즉시 중단, 보고 |
-| 아키텍처 변경 필요 | architect 승인 요청 |
+| 조건 | 행동 | 근거 |
+|------|------|------|
+| 피드백 루프 2회 실패 | 사용자에게 보고 | workflow-state 재시도 카운터 |
+| 총 에이전트 호출 15회 초과 | 사용자 확인 요청 | workflow-state 호출 기록 |
+| 요구사항 불명확 | 사용자에게 질문 | - |
+| Critical 보안 이슈 | 즉시 중단, 보고 | code-reviewer 결과 |
+| 아키텍처 REJECTED | 사용자에게 대안 제시 | architect 결과 |
 
 ---
 
@@ -147,6 +175,7 @@ autopilot --verbose 복잡한 기능 구현
 
 | Phase | 산출물 | 위치 |
 |-------|--------|------|
+| 전체 | 워크플로우 상태 | .omc/workflow-state.md |
 | 0 | PRD | .omc/artifacts/prd.md |
 | 1 | 코드베이스 분석 | .omc/context/codebase.md |
 | 1 | 요구사항 | .omc/notepads/requirements.md |
@@ -154,3 +183,13 @@ autopilot --verbose 복잡한 기능 구현
 | 2 | 디자인 스펙 | .omc/artifacts/design-spec.md |
 | 4 | 테스트 결과 | .omc/notepads/test-results.md |
 | 4 | 리뷰 결과 | .omc/decisions/review.md |
+| 0-3 | git checkpoint | Phase별 자동 커밋 |
+
+## 롤백
+
+Phase 실패 시 이전 checkpoint로 복원:
+```
+1. workflow-state.md에서 마지막 성공 Phase의 commit 해시 확인
+2. git reset --hard {해시}
+3. 해당 Phase부터 재실행
+```

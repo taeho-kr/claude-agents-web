@@ -98,13 +98,20 @@
 
 ## 세션 초기화 프로토콜
 
-**모든 작업 시작 전, Persistent Context를 로드합니다.**
+**모든 작업 시작 전, Persistent Context를 로드하고 검증합니다.**
 
 ```
 1. Read(".omc/context/project-state.md")   → 프로젝트 현재 상태
 2. Read(".omc/context/tech-stack.md")      → 기술 스택 결정
 3. Read(".omc/context/conventions.md")     → 코딩 컨벤션
 4. Read(".omc/context/preferences.md")     → 사용자 선호도
+5. 드리프트 감지 (프로젝트 코드가 존재하는 경우):
+   - package.json 의존성 vs tech-stack.md 비교
+   - 프로젝트 디렉토리 구조 vs conventions.md 비교
+   - 불일치 발견 시 → 사용자에게 보고 + PM 업데이트 제안
+6. Read(".omc/workflow-state.md") 존재 시:
+   - 이전 세션의 미완료 워크플로우 복원
+   - 마지막 Phase부터 재개 가능
 ```
 
 - 템플릿 상태 → 프로젝트 초기 설정 단계로 판단
@@ -127,6 +134,7 @@
 ```javascript
 Task({
   subagent_type: "general-purpose",
+  max_turns: /* 분석:15, 구현:25, 검증:10 */,
   prompt: `
 ${에이전트 프롬프트}
 
@@ -163,6 +171,7 @@ ${해당 에이전트의 output-contracts 포맷}
 │   ├── conventions.md    #   코딩 컨벤션
 │   ├── project-state.md  #   프로젝트 진행 상태
 │   └── codebase.md       #   코드베이스 분석 (세션별, git 미추적)
+├── workflow-state.md     # ⚙️ 워크플로우 실행 상태 (오케스트레이터 전용)
 ├── plans/                # planner만 작성 → 구현 에이전트가 읽음
 ├── notepads/             # 전체 append 전용 → 전체 읽기
 ├── decisions/            # architect, reviewer 작성 → 오케스트레이터가 읽음
@@ -229,6 +238,42 @@ Persistent Context는 **오케스트레이터만** 업데이트합니다.
 
 ---
 
+## 워크플로우 상태 관리
+
+에이전트 위임 워크플로우 시작 시 `.omc/workflow-state.md`를 생성/업데이트합니다.
+포맷: `references/output-contracts.md`의 workflow-state 섹션 참조.
+
+### 상태 기록 시점
+```
+워크플로우 시작     → workflow-state.md 생성
+Phase 전환 시       → Phase 진행 상태 + git checkpoint 업데이트
+에이전트 호출 시    → 호출 기록 테이블에 추가
+피드백 루프 진입 시 → 재시도 카운터 증가
+워크플로우 종료 시  → workflow-state.md 삭제 또는 완료 표시
+```
+
+### Phase별 Git Checkpoint
+```
+Phase 완료 → git add + git commit "[autopilot] Phase N: {요약}"
+Phase 실패 → git diff로 변경 확인 → git restore로 롤백 가능
+```
+- 체크포인트 커밋 해시를 workflow-state.md 롤백 포인트에 기록
+- 롤백 필요 시 해당 해시로 복원
+
+### 비용 가드
+```
+에이전트별 max_turns:
+  분석 (researcher, analyst, planner, designer, pm): 15
+  구현 (frontend, backend, dba, ai-server, executor): 25
+  검증 (unit-tester, code-reviewer, architect): 10
+
+전체 워크플로우 한도:
+  총 에이전트 호출: 15회 (초과 시 사용자 확인)
+  피드백 루프: 3회 (초과 시 사용자 보고)
+```
+
+---
+
 ## 결정 규칙
 
 | 상황 | 판단 |
@@ -240,6 +285,25 @@ Persistent Context는 **오케스트레이터만** 업데이트합니다.
 | UI 컴포넌트 | frontend |
 | 서로 독립적인 작업 | 병렬 |
 | 의존성 있음 (DB→API) | 순차 |
+
+### 병렬 실행 안전 정책
+
+병렬 에이전트에게 **수정 가능 파일 범위**를 명시합니다.
+
+```
+[frontend] src/components/**, src/app/**/page.tsx, src/hooks/**, src/styles/**
+[backend]  src/app/api/**, src/lib/server/**, src/services/**
+[dba]      prisma/**, src/lib/db/**
+[ai-server] src/lib/ai/**, src/services/ai/**
+```
+
+**공유 파일** (양쪽 모두 수정 가능성):
+```
+src/types/**, src/lib/shared/**, package.json, .env*
+→ 공유 파일은 병렬 금지. 한 에이전트가 먼저 수정 후 다음 에이전트 실행.
+```
+
+planner가 작업 계획 시 파일 영향 범위를 명시하고, 겹침이 있으면 순차 실행으로 전환.
 
 ---
 
@@ -294,12 +358,15 @@ Persistent Context는 **오케스트레이터만** 업데이트합니다.
 
 ## 주의사항
 
-1. **Persistent Context 로드**: 작업 시작 시 `.omc/context/` persistent 파일 로드
+1. **Persistent Context 로드**: 작업 시작 시 `.omc/context/` 로드 + 드리프트 감지
 2. **프롬프트 로드 필수**: 에이전트 호출 전 `agents/{name}.md` 읽기
 3. **산출물 포맷 준수**: `references/output-contracts.md` 포맷 지시
-4. **피드백 루프 실행**: 검증 실패 시 자동으로 수정 → 재검증
-5. **작업 완료 후 상태 업데이트**: `project-state.md` 갱신
-6. **선호도 감지 시 기록**: `preferences.md` 업데이트
-7. **TodoWrite 활용**: 복잡한 작업은 todo 리스트로 추적
-8. **증거 기반 완료**: 테스트/빌드 결과 없이 완료 선언 금지
-9. **과도한 위임 지양**: 간단한 건 직접 처리
+4. **워크플로우 상태 기록**: 에이전트 위임 시 `.omc/workflow-state.md` 유지
+5. **Phase별 git checkpoint**: Phase 완료마다 자동 커밋, 실패 시 롤백
+6. **max_turns 명시**: 모든 Task에 역할별 max_turns (분석:15, 구현:25, 검증:10)
+7. **피드백 루프 실행**: 검증 실패 시 수정 → 재검증 (재시도 카운터 추적)
+8. **병렬 안전**: 공유 파일 수정 시 순차 실행, 파일 범위 명시
+9. **작업 완료 후 상태 업데이트**: `project-state.md` 갱신
+10. **선호도 감지 시 기록**: `preferences.md` 업데이트
+11. **증거 기반 완료**: 테스트/빌드 결과 없이 완료 선언 금지
+12. **과도한 위임 지양**: 간단한 건 직접 처리
