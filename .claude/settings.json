@@ -1,0 +1,55 @@
+{
+  "project": {
+    "name": "dev-ai",
+    "description": "Multi-agent development system for web services"
+  },
+  "agents": {
+    "directory": "agents",
+    "available": [
+      "pm",
+      "planner",
+      "researcher",
+      "analyst",
+      "designer",
+      "executor",
+      "frontend",
+      "backend",
+      "ai-server",
+      "dba",
+      "architect",
+      "code-reviewer",
+      "unit-tester",
+      "integration-tester"
+    ]
+  },
+  "memory": {
+    "directory": ".omc",
+    "structure": {
+      "plans": "작업 계획 (planner 작성)",
+      "notepads": "작업 메모 (append 전용)",
+      "decisions": "결정 사항 기록",
+      "context": "프로젝트 컨텍스트"
+    }
+  },
+  "skills": {
+    "directory": "skills",
+    "available": [
+      "auth-flow",
+      "crud-feature",
+      "api-integration"
+    ]
+  },
+  "commands": {
+    "directory": "commands",
+    "available": [
+      "autopilot",
+      "parallel",
+      "review"
+    ]
+  },
+  "preferences": {
+    "auto_apply_threshold": 0.8,
+    "remind_threshold": 0.4,
+    "ask_threshold": 0.0
+  }
+}

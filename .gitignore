@@ -1,0 +1,30 @@
+# Local settings
+.claude/settings.local.json
+
+# Shared Memory (세션별 데이터)
+.omc/notepads/
+.omc/plans/
+.omc/context/
+
+# 보고서는 유지
+!.omc/reports/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Node (프로젝트 생성시)
+node_modules/
+.env
+.env.local
+
+# Python (프로젝트 생성시)
+__pycache__/
+*.pyc
+.venv/
