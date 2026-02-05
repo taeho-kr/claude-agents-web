@@ -24,11 +24,16 @@
   },
   "memory": {
     "directory": ".omc",
-    "structure": {
+    "persistent": {
+      "preferences": ".omc/context/preferences.md",
+      "tech_stack": ".omc/context/tech-stack.md",
+      "conventions": ".omc/context/conventions.md",
+      "project_state": ".omc/context/project-state.md"
+    },
+    "session": {
       "plans": "작업 계획 (planner 작성)",
       "notepads": "작업 메모 (append 전용)",
       "decisions": "결정 사항 기록",
-      "context": "프로젝트 컨텍스트",
       "artifacts": "산출물 (PRD, 디자인 스펙)",
       "reports": "분석 보고서"
     }
@@ -45,6 +50,7 @@
     "directory": "commands",
     "available": [
       "autopilot",
+      "compose",
       "parallel",
       "review",
       "integration-test"
