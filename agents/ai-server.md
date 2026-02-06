@@ -231,3 +231,11 @@ async def lifespan(app: FastAPI):
 - 시스템 프롬프트 설정 필요
 - Rate limit: 10 req/min
 ```
+
+---
+
+## 협업
+
+- **Receives from**: planner (작업 계획), analyst (AI 기능 요구사항)
+- **Delivers to**: unit-tester (AI 서비스 코드), code-reviewer (변경 파일), backend (AI API)
+- **Collaborates with**: backend, frontend (Phase 3에서 병렬 실행, 파일 범위 분리 필수)

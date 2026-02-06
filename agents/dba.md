@@ -266,3 +266,11 @@ model Tag {
 ### 주의사항
 - Session 삭제시 CASCADE로 처리됨
 ```
+
+---
+
+## 협업
+
+- **Receives from**: planner (작업 계획), analyst (데이터 요구사항)
+- **Delivers to**: backend (스키마/타입), frontend (타입 정의)
+- **Collaborates with**: Phase 3에서 보통 먼저 실행 (다른 에이전트가 스키마에 의존)

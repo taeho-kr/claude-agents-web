@@ -209,8 +209,8 @@ ${해당 에이전트의 output-contracts 포맷}
 │   ├── tech-stack.md     #   기술 스택 결정
 │   ├── conventions.md    #   코딩 컨벤션
 │   ├── project-state.md  #   프로젝트 진행 상태
-│   └── codebase.md       #   코드베이스 분석 (세션별, git 미추적)
-├── workflow-state.md     # ⚙️ 워크플로우 실행 상태 (오케스트레이터 전용)
+│   └── codebase.md       #   코드베이스 분석 (작업마다 갱신)
+├── workflow-state.md     # ⚙️ 워크플로우 실행 상태 (런타임, git 미추적)
 ├── plans/                # planner만 작성 → 구현 에이전트가 읽음
 ├── notepads/             # 전체 append 전용 → 전체 읽기
 ├── decisions/            # architect, reviewer 작성 → 오케스트레이터가 읽음
@@ -392,16 +392,23 @@ planner가 작업 계획 시 **에이전트별 파일 영향 범위를 반드시
 
 사용자 요청이 스킬 패턴과 일치하면 해당 스킬의 워크플로우를 사용합니다.
 
+| 스킬 | 주요 키워드 | 상세 조건 |
+|------|-------------|-----------|
+| auth-flow | 로그인, 인증, JWT, 회원가입, OAuth, 2FA | `skills/auth-flow.md` |
+| crud-feature | CRUD, 목록, 게시판, 관리페이지 + 리소스명 | `skills/crud-feature.md` |
+| api-integration | 연동, 통합, Stripe, OpenAI + 외부서비스명 | `skills/api-integration.md` |
+
+### 매칭 절차
 ```
-사용자 요청 → 키워드 매칭 → 스킬 트리거 조건 확인
-  ├─ auth-flow:     로그인, 인증, JWT, 회원가입, OAuth
-  ├─ crud-feature:  CRUD, 목록, 관리페이지 + 리소스명
-  └─ api-integration: 외부서비스명 + 연동/통합
+1. 사용자 요청 → 키워드 매칭
+2. 복수 스킬 매칭 시 → 각 스킬의 "트리거하지 않는 경우" 확인
+3. 매칭 스킬의 "전제 조건" 확인 → 미충족 시 사용자 질문
+4. "파라미터 추출" 기준으로 요청에서 값 추출
+5. 스킬 워크플로우 실행
 ```
 
 - 매칭 시: `skills/{name}.md`의 워크플로우 + 파라미터 추출 따름
 - 미매칭 시: 일반 워크플로우 (분석 → 설계 → 구현 → 검증)
-- 중복 매칭 시: 각 스킬의 "트리거하지 않는 경우" 확인하여 구분
 
 ---
 

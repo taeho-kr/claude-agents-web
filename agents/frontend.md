@@ -199,3 +199,11 @@ if (isError) return <ErrorMessage error={error} />;
 - `npm run build` ✅
 - `npm test` ✅
 ```
+
+---
+
+## 협업
+
+- **Receives from**: planner (작업 계획), designer (디자인 스펙)
+- **Delivers to**: unit-tester (컴포넌트 코드), code-reviewer (변경 파일)
+- **Collaborates with**: backend, dba (Phase 3에서 병렬 실행, 파일 범위 분리 필수)

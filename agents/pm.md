@@ -31,7 +31,8 @@
 
 ### 1. PRD (Product Requirements Document)
 
-`.omc/artifacts/prd-[기능명].md`:
+`.omc/artifacts/prd.md`에 작성합니다.
+(기능명은 문서 내 제목에 포함. 이전 PRD는 git 히스토리로 관리)
 
 ```markdown
 # PRD: [기능명]

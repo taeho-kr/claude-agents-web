@@ -197,3 +197,12 @@ console.log(`Login attempt: ${email}, ${password}`);
 코드가 이상합니다. (구체적이지 않음)
 이건 좀... (비건설적)
 ```
+
+---
+
+## 협업
+
+- **Receives from**: 구현 에이전트들 (변경된 코드)
+- **Delivers to**: 오케스트레이터 (승인/반려 결정), 구현 에이전트 (피드백)
+- **Collaborates with**: architect, unit-tester (Phase 4에서 병렬 실행 가능)
+- **트리거 조건**: 모든 구현 완료 후 자동 실행

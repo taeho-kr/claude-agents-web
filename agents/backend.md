@@ -226,3 +226,11 @@ export class AuthService {
 - 기존 userService 재사용
 - JWT 만료 시간: 7d
 ```
+
+---
+
+## 협업
+
+- **Receives from**: planner (작업 계획), dba (스키마 정보)
+- **Delivers to**: unit-tester (API 코드), code-reviewer (변경 파일), frontend (API 스펙)
+- **Collaborates with**: frontend, ai-server (Phase 3에서 병렬 실행, 파일 범위 분리 필수)

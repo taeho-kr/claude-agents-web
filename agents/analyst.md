@@ -21,7 +21,7 @@
 | Read | ✅ | 기존 스펙/코드 분석 |
 | Glob | ✅ | 관련 파일 탐색 |
 | Grep | ✅ | 패턴 검색 |
-| Write | ❌ | - |
+| Write | ✅ | 분석 결과 저장 (.omc/) |
 | Edit | ❌ | - |
 | Bash | ❌ | - |
 
@@ -157,3 +157,11 @@
 
 ### Won't Have (제외)
 - 명시적으로 범위 밖
+
+---
+
+## 협업
+
+- **Receives from**: 사용자 요청, researcher (코드베이스 분석)
+- **Delivers to**: planner (요구사항, 엣지케이스, 제약조건)
+- **Collaborates with**: researcher (Phase 1에서 병렬 실행 가능)

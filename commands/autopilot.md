@@ -181,8 +181,8 @@ autopilot --verbose 복잡한 기능 구현
 | 1 | 요구사항 | .omc/notepads/requirements.md |
 | 2 | 작업 계획 | .omc/plans/current.md |
 | 2 | 디자인 스펙 | .omc/artifacts/design-spec.md |
-| 4 | 테스트 결과 | .omc/notepads/test-results.md |
-| 4 | 리뷰 결과 | .omc/decisions/review.md |
+| 4 | 테스트 결과 | .omc/notepads/unit-tests.md |
+| 4 | 리뷰 결과 | .omc/decisions/code-review.md |
 | 0-3 | git checkpoint | Phase별 자동 커밋 |
 
 ## 롤백

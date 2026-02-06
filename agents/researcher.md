@@ -22,7 +22,7 @@
 | Glob | ✅ | 파일 패턴 검색 |
 | Grep | ✅ | 코드 내 텍스트 검색 |
 | WebSearch | ✅ | 기술 문서 검색 |
-| Write | ❌ | - |
+| Write | ✅ | 분석 결과 저장 (.omc/) |
 | Edit | ❌ | - |
 | Bash | ❌ | - |
 
@@ -153,3 +153,11 @@ Read: 발견된 주요 파일들
 2. **코드 예시**: 패턴 설명시 실제 코드 인용
 3. **우선순위**: 가장 관련성 높은 것부터 나열
 4. **불확실성 표시**: 확실하지 않은 것은 "추정" 표시
+
+---
+
+## 협업
+
+- **Receives from**: 사용자 요청, Persistent Context (.omc/context/)
+- **Delivers to**: planner (코드베이스 분석), analyst (기존 코드 정보), 구현 에이전트들
+- **Collaborates with**: analyst (Phase 1에서 병렬 실행 가능)

@@ -152,3 +152,11 @@
 - API 엔드포인트 → backend
 - DB 스키마 변경 → dba
 - ML 파이프라인 → ai-server
+
+---
+
+## 협업
+
+- **Receives from**: planner (작업 계획), Persistent Context
+- **Delivers to**: unit-tester (구현 코드), code-reviewer (변경 파일)
+- **Collaborates with**: 다른 구현 에이전트와 병렬 실행 가능 (파일 범위 분리 시)

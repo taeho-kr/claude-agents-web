@@ -32,9 +32,9 @@ Claude Code의 Task tool로 실행되며, CLAUDE.md의 오케스트레이터가 
 | 에이전트 | 역할 | 도구 | max_turns |
 |----------|------|------|-----------|
 | **pm** | PRD, 유저 스토리, 우선순위 | Read, Write | 15 |
-| **planner** | 작업 분해, 의존성 분석, 파일 영향 범위 | Read, Glob, Grep | 15 |
-| **researcher** | 코드베이스 탐색, 기술 조사 | Read, Glob, Grep, WebSearch | 15 |
-| **analyst** | 요구사항 분석, 엣지케이스 | Read, Glob, Grep | 15 |
+| **planner** | 작업 분해, 의존성 분석, 파일 영향 범위 | Read, Glob, Grep, Write, Edit | 15 |
+| **researcher** | 코드베이스 탐색, 기술 조사 | Read, Glob, Grep, WebSearch, Write | 15 |
+| **analyst** | 요구사항 분석, 엣지케이스 | Read, Glob, Grep, Write | 15 |
 | **designer** | 디자인 시스템, 컴포넌트 스펙 | Read, Write | 15 |
 
 ### 실행
@@ -89,8 +89,8 @@ ${산출물 포맷 (output-contracts.md)}
 │   ├── tech-stack.md     #   기술 스택
 │   ├── conventions.md    #   코딩 컨벤션
 │   ├── project-state.md  #   프로젝트 진행 상태
-│   └── codebase.md       #   코드베이스 분석 (세션별)
-├── workflow-state.md     # 워크플로우 실행 상태 (런타임)
+│   └── codebase.md       #   코드베이스 분석 (작업마다 갱신)
+├── workflow-state.md     # 워크플로우 실행 상태 (런타임, git 미추적)
 ├── plans/                # planner → 구현 에이전트
 ├── notepads/             # append 전용
 ├── decisions/            # architect, reviewer → 오케스트레이터

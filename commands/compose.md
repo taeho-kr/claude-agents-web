@@ -165,4 +165,5 @@ Step 2: [frontend, backend] 중 backend만 실패:
   → 재시도 실패 시 → 사용자에게 보고
 ```
 
-compose도 구현 에이전트가 포함된 경우 workflow-state.md를 생성합니다.
+compose는 파이프라인 실행 시 항상 workflow-state.md를 생성합니다.
+(생성/삭제 조건: `references/output-contracts.md`의 workflow-state 섹션 참조)

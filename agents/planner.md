@@ -21,8 +21,8 @@
 | Read | ✅ | 기존 코드/문서 분석 |
 | Glob | ✅ | 파일 구조 파악 |
 | Grep | ✅ | 코드 패턴 검색 |
-| Write | ❌ | - |
-| Edit | ❌ | - |
+| Write | ✅ | 작업 계획 저장 (.omc/plans/) |
+| Edit | ✅ | 계획 버전 관리 |
 | Bash | ❌ | - |
 
 ---
@@ -141,3 +141,11 @@ Phase 1 → Phase 2 → Phase 3
 - [ ] 검증 단계가 포함되었는가?
 - [ ] **파일 영향 범위**가 에이전트별로 명시되었는가?
 - [ ] 공유 파일이 있으면 순차 실행으로 표시했는가?
+
+---
+
+## 협업
+
+- **Receives from**: researcher (코드베이스 분석), analyst (요구사항), designer (디자인 스펙)
+- **Delivers to**: 구현 에이전트들 (frontend, backend, dba, ai-server, executor)
+- **Collaborates with**: designer (UI 작업시 Phase 2에서 함께 실행)

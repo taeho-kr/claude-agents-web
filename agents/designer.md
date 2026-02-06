@@ -74,74 +74,21 @@
 
 ## 산출물
 
-### 1. 디자인 시스템
+모든 디자인 산출물은 **`.omc/artifacts/design-spec.md`** 단일 파일에 작성합니다.
+포맷은 `references/output-contracts.md`의 design-spec 섹션을 따릅니다.
 
-`.omc/artifacts/design-system.md`:
+> 기존 프로젝트의 디자인 시스템이 있다면 먼저 확인하고 일관성을 유지합니다.
 
-```markdown
-# Design System
+### 포함 내용
 
-## Colors
+1. **디자인 토큰** - 색상, 타이포그래피, 간격 등
+2. **컴포넌트 스펙** - 새로 만들거나 수정할 컴포넌트
+3. **화면 구조** - 레이아웃, 와이어프레임
+4. **사용자 흐름** - 인터랙션, 상태 전이
 
-### Primary
-- `primary-50`: #EEF2FF (배경)
-- `primary-100`: #E0E7FF
-- `primary-500`: #6366F1 (기본)
-- `primary-600`: #4F46E5 (호버)
-- `primary-700`: #4338CA (액티브)
+---
 
-### Neutral
-- `gray-50`: #F9FAFB
-- `gray-100`: #F3F4F6
-- `gray-500`: #6B7280
-- `gray-900`: #111827
-
-### Semantic
-- `success`: #10B981
-- `warning`: #F59E0B
-- `error`: #EF4444
-- `info`: #3B82F6
-
-## Typography
-
-### Font Family
-- Heading: Inter, system-ui, sans-serif
-- Body: Inter, system-ui, sans-serif
-- Mono: JetBrains Mono, monospace
-
-### Scale
-| Name | Size | Weight | Line Height | Usage |
-|------|------|--------|-------------|-------|
-| h1 | 36px | 700 | 1.2 | 페이지 제목 |
-| h2 | 30px | 600 | 1.3 | 섹션 제목 |
-| h3 | 24px | 600 | 1.4 | 서브섹션 |
-| body | 16px | 400 | 1.5 | 본문 |
-| small | 14px | 400 | 1.5 | 보조 텍스트 |
-| caption | 12px | 400 | 1.4 | 캡션, 라벨 |
-
-## Spacing
-- `xs`: 4px
-- `sm`: 8px
-- `md`: 16px
-- `lg`: 24px
-- `xl`: 32px
-- `2xl`: 48px
-
-## Border Radius
-- `sm`: 4px
-- `md`: 8px
-- `lg`: 12px
-- `full`: 9999px
-
-## Shadows
-- `sm`: 0 1px 2px rgba(0,0,0,0.05)
-- `md`: 0 4px 6px rgba(0,0,0,0.1)
-- `lg`: 0 10px 15px rgba(0,0,0,0.1)
-```
-
-### 2. 컴포넌트 스펙
-
-`.omc/artifacts/components/[component-name].md`:
+## 예시: 컴포넌트 스펙
 
 ```markdown
 # Component: Button
@@ -214,9 +161,7 @@
 ```
 ```
 
-### 3. 와이어프레임 (텍스트)
-
-`.omc/artifacts/wireframes/[page-name].md`:
+### 예시: 와이어프레임 (텍스트)
 
 ```markdown
 # Wireframe: Login Page
@@ -286,10 +231,10 @@
 - Mobile (<768px): 전체 너비, 좌우 패딩 16px
 ```
 
-### 4. 사용자 흐름
+### 예시: 사용자 흐름
 
 ```markdown
-# User Flow: 회원가입
+## User Flow: 회원가입
 
 ## 흐름도
 ```
