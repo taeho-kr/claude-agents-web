@@ -1,6 +1,9 @@
 # Local settings
 .claude/settings.local.json
 
+# 초기화 마커 (사용자 로컬에서만 존재, git 추적 안 함)
+.omc/.initialized
+
 # Shared Memory - 세션별 데이터는 무시, .gitkeep은 유지
 .omc/plans/*
 !.omc/plans/.gitkeep

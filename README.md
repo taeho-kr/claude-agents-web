@@ -8,21 +8,34 @@ Claude Code 위에서 동작하며, 14개 전문 에이전트가 협업합니다
 ## Quick Start
 
 ```bash
-# 1. 이 디렉토리를 프로젝트 루트에 복사
-cp -r dev-ai/* your-project/
-
-# 2. 프로젝트에서 Claude Code 실행
-cd your-project
+# 방법 1: git clone (권장)
+git clone https://github.com/your/dev-ai.git my-project
+cd my-project
 claude
+# → 자동으로 dev-ai git 히스토리 제거 + 새 프로젝트 초기화
 
-# 3. 명령 실행
+# 방법 2: 기존 프로젝트에 추가
+cp -r dev-ai/* your-existing-project/
+cd your-existing-project
+claude
+# → 기존 git 유지, dev-ai 설정만 추가
+```
+
+### 첫 실행 시 자동 동작
+
+1. **Git 초기화**: dev-ai clone인 경우 템플릿 git 히스토리 자동 제거
+2. **프로젝트 설정**: 기술 스택, 컨벤션, 선호도 질문
+3. **Persistent Context 생성**: `.omc/context/` 파일 작성
+
+이후 실행부터는 초기화 과정 없이 바로 작업 가능합니다.
+
+```bash
+# 명령 예시
 > autopilot 로그인 기능 구현해줘
 > compose researcher → planner → (frontend | backend) → unit-tester
 > parallel LoginForm 구현 | /auth/login API | users 테이블 생성
 > review src/api/
 ```
-
-첫 실행 시 `.omc/context/` 파일이 빈 템플릿 상태이면 프로젝트 초기 설정으로 진입합니다.
 
 ---
 

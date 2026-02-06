@@ -98,7 +98,65 @@
 
 ## 세션 초기화 프로토콜
 
-**모든 작업 시작 전, Persistent Context를 로드하고 검증합니다.**
+**모든 작업 시작 전, 초기화 상태를 확인하고 Persistent Context를 로드합니다.**
+
+### Phase 0: 첫 실행 감지 (1회성)
+
+`.omc/.initialized` 파일 존재 여부로 첫 실행을 판단합니다.
+
+```
+.omc/.initialized 없음 → 첫 실행 (아래 Git 초기화 절차 실행)
+.omc/.initialized 있음 → 기존 프로젝트 (Phase 1로 스킵)
+```
+
+### Git 초기화 절차 (첫 실행 시)
+
+dev-ai를 `git clone`으로 받은 경우, 템플릿의 git 히스토리를 제거하고 새 프로젝트로 시작합니다.
+
+#### Step 1: 현재 상태 확인
+
+다음 정보를 수집합니다:
+
+| 확인 항목 | 방법 | 결과 변수 |
+|----------|------|----------|
+| .git 폴더 존재 | Glob으로 `.git` 폴더 확인 | `HAS_GIT` |
+| origin URL | `git config --get remote.origin.url` 실행 | `ORIGIN_URL` |
+| 작업 트리 상태 | `git status --porcelain` 실행 | `IS_CLEAN` (출력 없으면 true) |
+
+#### Step 2: 분기 처리
+
+```
+HAS_GIT = false (git 저장소 아님)
+  → "git 저장소가 아닙니다. 새로 초기화할까요?" (AskUserQuestion)
+  → 승인 시: git init → git add . → git commit
+
+HAS_GIT = true AND ORIGIN_URL에 "dev-ai" 포함 AND IS_CLEAN = true
+  → 자동으로 git 초기화 실행 (사용자 확인 불필요)
+
+HAS_GIT = true AND ORIGIN_URL에 "dev-ai" 포함 AND IS_CLEAN = false
+  → "저장되지 않은 변경사항이 있습니다. 처리 방법을 선택해주세요:"
+    - 커밋 후 초기화
+    - 변경사항 버리고 초기화
+    - 취소
+
+HAS_GIT = true AND ORIGIN_URL에 "dev-ai" 미포함
+  → "기존 프로젝트에 dev-ai를 추가한 것 같습니다. git은 그대로 유지할까요?"
+  → 유지 시: git 초기화 스킵
+  → 초기화 시: .git 삭제 후 새로 init
+```
+
+#### Step 3: Git 초기화 실행
+
+자동 또는 사용자 승인 후 실행할 작업:
+
+1. **Bash**: `.git` 폴더 삭제 (OS에 맞는 명령어 사용)
+2. **Bash**: `git init` 실행
+3. **Bash**: `git add .` 실행
+4. **Bash**: `git commit -m "chore: init project from dev-ai template"` 실행
+
+> 참고: Windows에서는 `Remove-Item -Recurse -Force .git`, Unix에서는 `rm -rf .git` 사용
+
+### Phase 1: Persistent Context 로드
 
 ```
 1. Read(".omc/context/project-state.md")   → 프로젝트 현재 상태
@@ -141,7 +199,11 @@
    - preferences.md    ← 사용자 답변에서 추출
    - project-state.md  ← 현재 진행 상태 기록
 
-4. 작성 예시 참조: references/persistent-memory-examples.md
+4. 초기화 완료 마킹:
+   - .omc/.initialized 파일 생성 (touch)
+   - 초기화는 1회만 실행됨
+
+5. 작성 예시 참조: references/persistent-memory-examples.md
 ```
 
 기존 프로젝트가 없는 빈 디렉토리인 경우:
@@ -149,6 +211,7 @@
 1. 프로젝트 목적 질문 (웹 앱, API, 풀스택 등)
 2. 기술 스택 선택 (사용자에게 옵션 제시)
 3. 프로젝트 스캐폴딩 후 Persistent Context 작성
+4. .omc/.initialized 생성
 ```
 
 ---
@@ -385,6 +448,7 @@ planner가 작업 계획 시 **에이전트별 파일 영향 범위를 반드시
 | `references/session-management.md` | 세션 컨텍스트 관리 | 장기 작업 시 |
 | `references/external-integration.md` | 외부 도구 연동 패턴 | 이슈/CI/API 연동 시 |
 | `references/persistent-memory-examples.md` | PM 작성 예시 | 최초 프로젝트 설정 시 |
+| `references/init-scenarios.md` | 초기화 시나리오 테스트 | 첫 실행 동작 검증 시 |
 
 ---
 
@@ -414,15 +478,16 @@ planner가 작업 계획 시 **에이전트별 파일 영향 범위를 반드시
 
 ## 주의사항
 
-1. **Persistent Context 로드**: 작업 시작 시 `.omc/context/` 로드 + 드리프트 감지
-2. **프롬프트 로드 필수**: 에이전트 호출 전 `agents/{name}.md` + `agents/_common.md` 읽기
-3. **산출물 포맷 준수**: `references/output-contracts.md` 포맷 지시
-4. **워크플로우 상태 기록**: 에이전트 위임 시 `.omc/workflow-state.md` 유지
-5. **Phase별 git checkpoint**: Phase 완료마다 자동 커밋, 실패 시 롤백
-6. **max_turns 명시**: 모든 Task에 역할별 max_turns (분석:15, 구현:25, 검증:10)
-7. **피드백 루프 실행**: 검증 실패 시 수정 → 재검증 (재시도 카운터 추적)
-8. **병렬 안전**: 공유 파일 수정 시 순차 실행, 파일 범위 명시
-9. **작업 완료 후 상태 업데이트**: `project-state.md` 갱신
-10. **선호도 감지 시 기록**: `preferences.md` 업데이트
-11. **증거 기반 완료**: 테스트/빌드 결과 없이 완료 선언 금지
-12. **과도한 위임 지양**: 간단한 건 직접 처리
+1. **첫 실행 감지**: `.omc/.initialized` 없으면 Git 초기화 절차 실행
+2. **Persistent Context 로드**: 작업 시작 시 `.omc/context/` 로드 + 드리프트 감지
+3. **프롬프트 로드 필수**: 에이전트 호출 전 `agents/{name}.md` + `agents/_common.md` 읽기
+4. **산출물 포맷 준수**: `references/output-contracts.md` 포맷 지시
+5. **워크플로우 상태 기록**: 에이전트 위임 시 `.omc/workflow-state.md` 유지
+6. **Phase별 git checkpoint**: Phase 완료마다 자동 커밋, 실패 시 롤백
+7. **max_turns 명시**: 모든 Task에 역할별 max_turns (분석:15, 구현:25, 검증:10)
+8. **피드백 루프 실행**: 검증 실패 시 수정 → 재검증 (재시도 카운터 추적)
+9. **병렬 안전**: 공유 파일 수정 시 순차 실행, 파일 범위 명시
+10. **작업 완료 후 상태 업데이트**: `project-state.md` 갱신
+11. **선호도 감지 시 기록**: `preferences.md` 업데이트
+12. **증거 기반 완료**: 테스트/빌드 결과 없이 완료 선언 금지
+13. **과도한 위임 지양**: 간단한 건 직접 처리
