@@ -58,11 +58,11 @@
 
 | 명령어 | 설명 | 파일 |
 |--------|------|------|
-| `autopilot` | 전체 워크플로우 자동 실행 | commands/autopilot.md |
-| `compose` | 에이전트 자유 조합 파이프라인 | commands/compose.md |
-| `parallel` | 독립 작업 병렬 실행 | commands/parallel.md |
-| `review` | 코드/아키텍처 리뷰 | commands/review.md |
-| `integration-test` | 통합/E2E 테스트 | commands/integration-test.md |
+| `autopilot` | 전체 워크플로우 자동 실행 | .claude/commands/autopilot.md |
+| `compose` | 에이전트 자유 조합 파이프라인 | .claude/commands/compose.md |
+| `parallel` | 독립 작업 병렬 실행 | .claude/commands/parallel.md |
+| `review` | 코드/아키텍처 리뷰 | .claude/commands/review.md |
+| `integration-test` | 통합/E2E 테스트 | .claude/commands/integration-test.md |
 
 ---
 
@@ -102,11 +102,11 @@
 
 ### Phase 0: 첫 실행 감지 (1회성)
 
-`.omc/.initialized` 파일 존재 여부로 첫 실행을 판단합니다.
+`.claude/memory/.initialized` 파일 존재 여부로 첫 실행을 판단합니다.
 
 ```
-.omc/.initialized 없음 → 첫 실행 (아래 Git 초기화 절차 실행)
-.omc/.initialized 있음 → 기존 프로젝트 (Phase 1로 스킵)
+.claude/memory/.initialized 없음 → 첫 실행 (아래 Git 초기화 절차 실행)
+.claude/memory/.initialized 있음 → 기존 프로젝트 (Phase 1로 스킵)
 ```
 
 ### Git 초기화 절차 (첫 실행 시)
@@ -159,10 +159,10 @@ HAS_GIT = true AND ORIGIN_URL에 "dev-ai" 미포함
 ### Phase 1: Persistent Context 로드
 
 ```
-1. Read(".omc/context/project-state.md")   → 프로젝트 현재 상태
-2. Read(".omc/context/tech-stack.md")      → 기술 스택 결정
-3. Read(".omc/context/conventions.md")     → 코딩 컨벤션
-4. Read(".omc/context/preferences.md")     → 사용자 선호도
+1. Read(".claude/memory/context/project-state.md")   → 프로젝트 현재 상태
+2. Read(".claude/memory/context/tech-stack.md")      → 기술 스택 결정
+3. Read(".claude/memory/context/conventions.md")     → 코딩 컨벤션
+4. Read(".claude/memory/context/preferences.md")     → 사용자 선호도
 5. 드리프트 감지 (프로젝트 코드가 존재하는 경우):
    - 패키지 매니저 파일(package.json, pyproject.toml 등) 읽기
    - tech-stack.md의 "주요 라이브러리" 목록과 실제 dependencies 비교
@@ -170,7 +170,7 @@ HAS_GIT = true AND ORIGIN_URL에 "dev-ai" 미포함
      - tech-stack.md에 있지만 실제에 없는 라이브러리 → 제거 또는 확인
      - devDependencies는 검사하지 않음 (린터, 테스트 도구 등)
    - 불일치 발견 시 → 사용자에게 보고 + Persistent Context 업데이트 제안
-6. Read(".omc/workflow-state.md") 존재 시:
+6. Read(".claude/memory/workflow-state.md") 존재 시:
    - 이전 세션의 미완료 워크플로우 복원
    - 마지막 Phase부터 재개 가능
 ```
@@ -180,7 +180,7 @@ HAS_GIT = true AND ORIGIN_URL에 "dev-ai" 미포함
 
 ### 초기 설정 절차 (Persistent Context가 템플릿 상태일 때)
 
-프로젝트에 처음 적용되거나 `.omc/context/` 파일이 비어있을 때 실행합니다.
+프로젝트에 처음 적용되거나 `.claude/memory/context/` 파일이 비어있을 때 실행합니다.
 
 ```
 1. 프로젝트 자동 감지:
@@ -200,10 +200,10 @@ HAS_GIT = true AND ORIGIN_URL에 "dev-ai" 미포함
    - project-state.md  ← 현재 진행 상태 기록
 
 4. 초기화 완료 마킹:
-   - .omc/.initialized 파일 생성 (touch)
+   - .claude/memory/.initialized 파일 생성 (touch)
    - 초기화는 1회만 실행됨
 
-5. 작성 예시 참조: references/persistent-memory-examples.md
+5. 작성 예시 참조: .claude/references/persistent-memory-examples.md
 ```
 
 기존 프로젝트가 없는 빈 디렉토리인 경우:
@@ -211,7 +211,7 @@ HAS_GIT = true AND ORIGIN_URL에 "dev-ai" 미포함
 1. 프로젝트 목적 질문 (웹 앱, API, 풀스택 등)
 2. 기술 스택 선택 (사용자에게 옵션 제시)
 3. 프로젝트 스캐폴딩 후 Persistent Context 작성
-4. .omc/.initialized 생성
+4. .claude/memory/.initialized 생성
 ```
 
 ---
@@ -219,12 +219,12 @@ HAS_GIT = true AND ORIGIN_URL에 "dev-ai" 미포함
 ## 에이전트 호출 프로토콜
 
 ```
-1. Persistent Context 로드 (.omc/context/ persistent 파일)
-2. 에이전트 프롬프트 로드 (agents/{name}.md)
-3. 공통 규칙 로드 (agents/_common.md)
+1. Persistent Context 로드 (.claude/memory/context/ persistent 파일)
+2. 에이전트 프롬프트 로드 (.claude/agents/{name}.md)
+3. 공통 규칙 로드 (.claude/agents/_common.md)
 4. Task 생성:
    - prompt: 에이전트 프롬프트 + 공통 규칙 + Persistent Context + 작업 지시
-   - 산출물 포맷: references/output-contracts.md 준수 지시
+   - 산출물 포맷: .claude/references/output-contracts.md 준수 지시
 5. 병렬 실행: 독립 작업은 하나의 메시지에서 여러 Task 동시 호출
 ```
 
@@ -238,7 +238,7 @@ ${에이전트 프롬프트}
 
 ---
 ## 공통 규칙
-${agents/_common.md 내용}
+${.claude/agents/_common.md 내용}
 
 ---
 ## Persistent Context
@@ -259,14 +259,14 @@ ${해당 에이전트의 output-contracts 포맷}
 })
 ```
 
-컨텍스트 선별 기준은 `references/session-management.md` 참조.
+컨텍스트 선별 기준은 `.claude/references/session-management.md` 참조.
 
 ---
 
-## Shared Memory (.omc/)
+## Shared Memory (.claude/memory/)
 
 ```
-.omc/
+.claude/memory/
 ├── context/              # 🔒 Persistent (세션 간 유지, git 추적)
 │   ├── preferences.md    #   사용자 선호도 (누적)
 │   ├── tech-stack.md     #   기술 스택 결정
@@ -336,14 +336,14 @@ Persistent Context는 **오케스트레이터만** 업데이트합니다.
   → APPROVED → 계속 / REJECTED → 사용자 보고
 ```
 
-실패 유형별 상세 절차: `references/error-recovery.md`
+실패 유형별 상세 절차: `.claude/references/error-recovery.md`
 
 ---
 
 ## 워크플로우 상태 관리
 
-에이전트 위임 워크플로우 시작 시 `.omc/workflow-state.md`를 생성/업데이트합니다.
-포맷: `references/output-contracts.md`의 workflow-state 섹션 참조.
+에이전트 위임 워크플로우 시작 시 `.claude/memory/workflow-state.md`를 생성/업데이트합니다.
+포맷: `.claude/references/output-contracts.md`의 workflow-state 섹션 참조.
 
 ### 상태 기록 시점
 ```
@@ -434,7 +434,7 @@ planner가 작업 계획 시 **에이전트별 파일 영향 범위를 반드시
 ## 외부 연동
 
 이슈 번호(`#42`), URL, CLI 명령 등으로 외부 서비스에 직접 접근합니다.
-상세: `references/external-integration.md`
+상세: `.claude/references/external-integration.md`
 
 ---
 
@@ -442,13 +442,13 @@ planner가 작업 계획 시 **에이전트별 파일 영향 범위를 반드시
 
 | 파일 | 용도 | 참조 시점 |
 |------|------|----------|
-| `agents/_common.md` | 에이전트 공통 규칙 | 에이전트 호출 시 |
-| `references/output-contracts.md` | 산출물 필수 포맷 | 에이전트 호출 시 |
-| `references/error-recovery.md` | 에러 유형별 복구 절차 | 에이전트 실패 시 |
-| `references/session-management.md` | 세션 컨텍스트 관리 | 장기 작업 시 |
-| `references/external-integration.md` | 외부 도구 연동 패턴 | 이슈/CI/API 연동 시 |
-| `references/persistent-memory-examples.md` | PM 작성 예시 | 최초 프로젝트 설정 시 |
-| `references/init-scenarios.md` | 초기화 시나리오 테스트 | 첫 실행 동작 검증 시 |
+| `.claude/agents/_common.md` | 에이전트 공통 규칙 | 에이전트 호출 시 |
+| `.claude/references/output-contracts.md` | 산출물 필수 포맷 | 에이전트 호출 시 |
+| `.claude/references/error-recovery.md` | 에러 유형별 복구 절차 | 에이전트 실패 시 |
+| `.claude/references/session-management.md` | 세션 컨텍스트 관리 | 장기 작업 시 |
+| `.claude/references/external-integration.md` | 외부 도구 연동 패턴 | 이슈/CI/API 연동 시 |
+| `.claude/references/persistent-memory-examples.md` | PM 작성 예시 | 최초 프로젝트 설정 시 |
+| `.claude/references/init-scenarios.md` | 초기화 시나리오 테스트 | 첫 실행 동작 검증 시 |
 
 ---
 
@@ -458,9 +458,9 @@ planner가 작업 계획 시 **에이전트별 파일 영향 범위를 반드시
 
 | 스킬 | 주요 키워드 | 상세 조건 |
 |------|-------------|-----------|
-| auth-flow | 로그인, 인증, JWT, 회원가입, OAuth, 2FA | `skills/auth-flow.md` |
-| crud-feature | CRUD, 목록, 게시판, 관리페이지 + 리소스명 | `skills/crud-feature.md` |
-| api-integration | 연동, 통합, Stripe, OpenAI + 외부서비스명 | `skills/api-integration.md` |
+| auth-flow | 로그인, 인증, JWT, 회원가입, OAuth, 2FA | `.claude/skills/auth-flow.md` |
+| crud-feature | CRUD, 목록, 게시판, 관리페이지 + 리소스명 | `.claude/skills/crud-feature.md` |
+| api-integration | 연동, 통합, Stripe, OpenAI + 외부서비스명 | `.claude/skills/api-integration.md` |
 
 ### 매칭 절차
 ```
@@ -471,18 +471,18 @@ planner가 작업 계획 시 **에이전트별 파일 영향 범위를 반드시
 5. 스킬 워크플로우 실행
 ```
 
-- 매칭 시: `skills/{name}.md`의 워크플로우 + 파라미터 추출 따름
+- 매칭 시: `.claude/skills/{name}.md`의 워크플로우 + 파라미터 추출 따름
 - 미매칭 시: 일반 워크플로우 (분석 → 설계 → 구현 → 검증)
 
 ---
 
 ## 주의사항
 
-1. **첫 실행 감지**: `.omc/.initialized` 없으면 Git 초기화 절차 실행
-2. **Persistent Context 로드**: 작업 시작 시 `.omc/context/` 로드 + 드리프트 감지
-3. **프롬프트 로드 필수**: 에이전트 호출 전 `agents/{name}.md` + `agents/_common.md` 읽기
-4. **산출물 포맷 준수**: `references/output-contracts.md` 포맷 지시
-5. **워크플로우 상태 기록**: 에이전트 위임 시 `.omc/workflow-state.md` 유지
+1. **첫 실행 감지**: `.claude/memory/.initialized` 없으면 Git 초기화 절차 실행
+2. **Persistent Context 로드**: 작업 시작 시 `.claude/memory/context/` 로드 + 드리프트 감지
+3. **프롬프트 로드 필수**: 에이전트 호출 전 `.claude/agents/{name}.md` + `.claude/agents/_common.md` 읽기
+4. **산출물 포맷 준수**: `.claude/references/output-contracts.md` 포맷 지시
+5. **워크플로우 상태 기록**: 에이전트 위임 시 `.claude/memory/workflow-state.md` 유지
 6. **Phase별 git checkpoint**: Phase 완료마다 자동 커밋, 실패 시 롤백
 7. **max_turns 명시**: 모든 Task에 역할별 max_turns (분석:15, 구현:25, 검증:10)
 8. **피드백 루프 실행**: 검증 실패 시 수정 → 재검증 (재시도 카운터 추적)

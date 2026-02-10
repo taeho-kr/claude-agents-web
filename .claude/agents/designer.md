@@ -74,8 +74,8 @@
 
 ## 산출물
 
-모든 디자인 산출물은 **`.omc/artifacts/design-spec.md`** 단일 파일에 작성합니다.
-포맷은 `references/output-contracts.md`의 design-spec 섹션을 따릅니다.
+모든 디자인 산출물은 **`.claude/memory/artifacts/design-spec.md`** 단일 파일에 작성합니다.
+포맷은 `.claude/references/output-contracts.md`의 design-spec 섹션을 따릅니다.
 
 > 기존 프로젝트의 디자인 시스템이 있다면 먼저 확인하고 일관성을 유지합니다.
 

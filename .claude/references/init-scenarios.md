@@ -7,7 +7,7 @@ dev-ai 첫 실행 시 git 초기화 동작을 검증하기 위한 시나리오�
 ## 판단 흐름도
 
 ```
-.omc/.initialized 존재?
+.claude/memory/.initialized 존재?
   ├─ Yes → Phase 1로 스킵 (초기화 완료된 프로젝트)
   └─ No → 첫 실행
            │
@@ -51,14 +51,14 @@ claude
 3. git add .
 4. git commit -m "chore: init project from dev-ai template"
 5. 프로젝트 초기 설정 진행
-6. .omc/.initialized 생성
+6. .claude/memory/.initialized 생성
 ```
 
 ### 검증
 ```bash
 git log --oneline  # 커밋 1개만 존재
 git remote -v      # origin 없음
-ls .omc/.initialized  # 파일 존재 (Windows: dir .omc\.initialized)
+ls .claude/memory/.initialized  # 파일 존재 (Windows: dir .omc\.initialized)
 ```
 
 ---
@@ -88,7 +88,7 @@ claude
 사용자 선택:
   - "유지" → git 초기화 스킵, 프로젝트 설정만 진행
   - "초기화" → .git 삭제 후 새로 init
-→ .omc/.initialized 생성
+→ .claude/memory/.initialized 생성
 ```
 
 ---
@@ -165,7 +165,7 @@ claude
 ```
 
 ### 예상 조건
-- `.omc/.initialized` 있음 ❌
+- `.claude/memory/.initialized` 있음 ❌
 - → Phase 0 스킵
 
 ### 예상 동작
@@ -210,7 +210,7 @@ claude
 
 ```bash
 # 1. 초기화 마커 존재
-ls -la .omc/.initialized
+ls -la .claude/memory/.initialized
 
 # 2. git 상태
 git log --oneline -5
@@ -218,8 +218,8 @@ git remote -v
 git status
 
 # 3. Persistent Context 생성
-cat .omc/context/tech-stack.md
-cat .omc/context/project-state.md
+cat .claude/memory/context/tech-stack.md
+cat .claude/memory/context/project-state.md
 
 # 4. 두 번째 실행 시 초기화 스킵 확인
 claude  # 초기화 질문 없이 바로 명령 대기

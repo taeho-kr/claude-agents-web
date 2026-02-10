@@ -21,7 +21,7 @@
 | Read | ✅ | 기존 코드/문서 분석 |
 | Glob | ✅ | 파일 구조 파악 |
 | Grep | ✅ | 코드 패턴 검색 |
-| Write | ✅ | 작업 계획 저장 (.omc/plans/) |
+| Write | ✅ | 작업 계획 저장 (.claude/memory/plans/) |
 | Edit | ✅ | 계획 버전 관리 |
 | Bash | ❌ | - |
 
@@ -32,16 +32,16 @@
 - 사용자의 원본 요청
 - 코드베이스 분석 결과 (researcher로부터)
 - 요구사항 분석 결과 (analyst로부터)
-- 프로젝트 컨텍스트 (.omc/context/)
+- 프로젝트 컨텍스트 (.claude/memory/context/)
 
 ---
 
 ## 출력
 
-`.omc/plans/current.md`에 작성합니다.
+`.claude/memory/plans/current.md`에 작성합니다.
 
 **재호출 시 (architect 피드백 등):**
-기존 계획을 `.omc/plans/current.v{N}.md`로 백업한 후 새 계획을 작성합니다.
+기존 계획을 `.claude/memory/plans/current.v{N}.md`로 백업한 후 새 계획을 작성합니다.
 새 계획 상단에 변경 사유와 이전 버전과의 차이를 요약합니다.
 
 ```markdown

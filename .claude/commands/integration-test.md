@@ -48,7 +48,7 @@ integration-test --api /api/users     # API 통합 테스트
                      - 테스트 데이터 삭제
                      - 연결 종료
                      - 결과 리포트
-                     → .omc/notepads/integration-tests.md
+                     → .claude/memory/notepads/integration-tests.md
 ```
 
 ---
@@ -153,7 +153,7 @@ Time: 2.5s
 ```
 
 ### 리포트 파일
-`.omc/notepads/integration-tests.md`:
+`.claude/memory/notepads/integration-tests.md`:
 ```markdown
 ## [타임스탬프] Integration Test
 

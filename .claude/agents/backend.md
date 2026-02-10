@@ -205,7 +205,7 @@ export class AuthService {
 
 ## 작업 기록
 
-`.omc/notepads/backend.md`에 추가:
+`.claude/memory/notepads/backend.md`에 추가:
 
 ```markdown
 ## [API 명]

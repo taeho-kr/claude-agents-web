@@ -207,7 +207,7 @@ async def lifespan(app: FastAPI):
 
 ## 작업 기록
 
-`.omc/notepads/ai-server.md`에 추가:
+`.claude/memory/notepads/ai-server.md`에 추가:
 
 ```markdown
 ## [기능명]

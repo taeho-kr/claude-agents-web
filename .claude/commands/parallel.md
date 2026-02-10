@@ -45,7 +45,7 @@ parallel LoginForm 구현 | /auth/login API 구현 | users 테이블 수정
 ### 파일 범위 분리 (필수)
 
 병렬 실행 전, 오케스트레이터가 각 에이전트의 수정 가능 파일 범위를 확인합니다.
-planner의 작업 계획(plans/current.md)에 명시된 파일 범위를 기준으로 합니다.
+planner의 작업 계획(.claude/memory/plans/current.md)에 명시된 파일 범위를 기준으로 합니다.
 
 **기본 원칙:**
 ```
@@ -121,4 +121,4 @@ parallel 중 일부 에이전트만 실패:
 ```
 
 ### 에러 복구
-실패 유형별 상세 절차: `references/error-recovery.md`
+실패 유형별 상세 절차: `.claude/references/error-recovery.md`

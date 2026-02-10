@@ -23,11 +23,11 @@ autopilot --skip-design 버그 수정해줘
 
 ## 워크플로우
 
-> 각 Phase 완료 시 `.omc/workflow-state.md`를 업데이트합니다.
+> 각 Phase 완료 시 `.claude/memory/workflow-state.md`를 업데이트합니다.
 
 ### 시작 전
 ```
-1. .omc/workflow-state.md 생성 (명령, 요청 요약, Phase 목록)
+1. .claude/memory/workflow-state.md 생성 (명령, 요청 요약, Phase 목록)
 2. Persistent Context 로드 + 드리프트 감지
 ```
 
@@ -36,7 +36,7 @@ autopilot --skip-design 버그 수정해줘
 
 ```
 [pm] PRD 작성, 기능 명세, 우선순위 정의
-     → .omc/artifacts/prd.md
+     → .claude/memory/artifacts/prd.md
 → git commit "[autopilot] Phase 0: 기획 완료"
 → workflow-state.md 업데이트 (Phase 0 완료, commit 해시 기록)
 ```
@@ -44,9 +44,9 @@ autopilot --skip-design 버그 수정해줘
 ### Phase 1: 분석
 ```
 [researcher] 코드베이스 분석 (max_turns: 15)
-             → .omc/context/codebase.md
+             → .claude/memory/context/codebase.md
 [analyst]    요구사항 도출, 엣지케이스 식별 (max_turns: 15)
-             → .omc/notepads/requirements.md
+             → .claude/memory/notepads/requirements.md
 → git commit "[autopilot] Phase 1: 분석 완료"
 → workflow-state.md 업데이트
 ```
@@ -54,10 +54,10 @@ autopilot --skip-design 버그 수정해줘
 ### Phase 2: 설계
 ```
 [planner]  작업 계획 수립, 의존성 분석 (max_turns: 15)
-           → .omc/plans/current.md
+           → .claude/memory/plans/current.md
            ⚠️ planner는 파일 영향 범위를 명시해야 함 (병렬 안전)
 [designer] UI/UX 스펙 정의 (UI 작업시) (max_turns: 15)
-           → .omc/artifacts/design-spec.md
+           → .claude/memory/artifacts/design-spec.md
 → git commit "[autopilot] Phase 2: 설계 완료"
 → workflow-state.md 업데이트
 ```
@@ -175,14 +175,14 @@ autopilot --verbose 복잡한 기능 구현
 
 | Phase | 산출물 | 위치 |
 |-------|--------|------|
-| 전체 | 워크플로우 상태 | .omc/workflow-state.md |
-| 0 | PRD | .omc/artifacts/prd.md |
-| 1 | 코드베이스 분석 | .omc/context/codebase.md |
-| 1 | 요구사항 | .omc/notepads/requirements.md |
-| 2 | 작업 계획 | .omc/plans/current.md |
-| 2 | 디자인 스펙 | .omc/artifacts/design-spec.md |
-| 4 | 테스트 결과 | .omc/notepads/unit-tests.md |
-| 4 | 리뷰 결과 | .omc/decisions/code-review.md |
+| 전체 | 워크플로우 상태 | .claude/memory/workflow-state.md |
+| 0 | PRD | .claude/memory/artifacts/prd.md |
+| 1 | 코드베이스 분석 | .claude/memory/context/codebase.md |
+| 1 | 요구사항 | .claude/memory/notepads/requirements.md |
+| 2 | 작업 계획 | .claude/memory/plans/current.md |
+| 2 | 디자인 스펙 | .claude/memory/artifacts/design-spec.md |
+| 4 | 테스트 결과 | .claude/memory/notepads/unit-tests.md |
+| 4 | 리뷰 결과 | .claude/memory/decisions/code-review.md |
 | 0-3 | git checkpoint | Phase별 자동 커밋 |
 
 ## 롤백

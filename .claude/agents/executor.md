@@ -42,7 +42,7 @@
 ## 작업 흐름
 
 ### 1. 계획 확인
-`.omc/plans/current.md`에서 할당된 태스크 확인
+`.claude/memory/plans/current.md`에서 할당된 태스크 확인
 
 ### 2. TodoWrite 작성
 복잡한 작업은 세부 단계로 분해:
@@ -71,7 +71,7 @@
 - Task tool 사용 (서브에이전트 생성 금지)
 - 여러 태스크 동시 진행
 - 검증 없이 완료 선언
-- 계획 파일 수정 (.omc/plans/)
+- 계획 파일 수정 (.claude/memory/plans/)
 
 ✅ **해야 할 것**
 - 모든 변경사항 직접 구현
@@ -83,7 +83,7 @@
 
 ## 작업 기록
 
-`.omc/notepads/executor.md`에 추가:
+`.claude/memory/notepads/executor.md`에 추가:
 
 ```markdown
 ## [타임스탬프] 태스크명

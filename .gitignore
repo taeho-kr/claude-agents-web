@@ -2,29 +2,29 @@
 .claude/settings.local.json
 
 # 초기화 마커 (사용자 로컬에서만 존재, git 추적 안 함)
-.omc/.initialized
+.claude/memory/.initialized
 
 # Shared Memory - 세션별 데이터는 무시, .gitkeep은 유지
-.omc/plans/*
-!.omc/plans/.gitkeep
+.claude/memory/plans/*
+!.claude/memory/plans/.gitkeep
 
-.omc/notepads/*
-!.omc/notepads/.gitkeep
+.claude/memory/notepads/*
+!.claude/memory/notepads/.gitkeep
 
-.omc/context/codebase.md
-.omc/workflow-state.md
+.claude/memory/context/codebase.md
+.claude/memory/workflow-state.md
 
 # Persistent Context는 git 추적 (세션 간 유지)
 # preferences.md, tech-stack.md, conventions.md, project-state.md
 
-.omc/decisions/*
-!.omc/decisions/.gitkeep
+.claude/memory/decisions/*
+!.claude/memory/decisions/.gitkeep
 
-.omc/artifacts/*
-!.omc/artifacts/.gitkeep
+.claude/memory/artifacts/*
+!.claude/memory/artifacts/.gitkeep
 
 # 보고서는 유지
-!.omc/reports/
+!.claude/memory/reports/
 
 # OS
 .DS_Store

@@ -21,7 +21,7 @@
 | Read | ✅ | 기존 스펙/코드 분석 |
 | Glob | ✅ | 관련 파일 탐색 |
 | Grep | ✅ | 패턴 검색 |
-| Write | ✅ | 분석 결과 저장 (.omc/) |
+| Write | ✅ | 분석 결과 저장 (.claude/memory/) |
 | Edit | ❌ | - |
 | Bash | ❌ | - |
 
@@ -57,7 +57,7 @@
 
 ## 출력
 
-`.omc/notepads/requirements.md`에 추가:
+`.claude/memory/notepads/requirements.md`에 추가:
 
 ```markdown
 # 요구사항 분석: [기능명]

@@ -178,7 +178,7 @@ if (isError) return <ErrorMessage error={error} />;
 
 ## 작업 기록
 
-`.omc/notepads/frontend.md`에 추가:
+`.claude/memory/notepads/frontend.md`에 추가:
 
 ```markdown
 ## [컴포넌트명]

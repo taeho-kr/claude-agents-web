@@ -5,7 +5,7 @@
 
 ---
 
-## .omc/context/codebase.md (researcher → 전체)
+## .claude/memory/context/codebase.md (researcher → 전체)
 
 ```markdown
 # 코드베이스 분석
@@ -31,7 +31,7 @@
 
 ---
 
-## .omc/notepads/requirements.md (analyst → planner, 구현 에이전트)
+## .claude/memory/notepads/requirements.md (analyst → planner, 구현 에이전트)
 
 ```markdown
 # 요구사항 분석
@@ -60,7 +60,7 @@
 
 ---
 
-## .omc/plans/current.md (planner → 구현 에이전트)
+## .claude/memory/plans/current.md (planner → 구현 에이전트)
 
 ```markdown
 # 작업 계획: [제목]
@@ -92,7 +92,7 @@
 
 ---
 
-## .omc/decisions/code-review.md (code-reviewer → 오케스트레이터)
+## .claude/memory/decisions/code-review.md (code-reviewer → 오케스트레이터)
 
 ```markdown
 # 코드 리뷰 결과
@@ -122,7 +122,7 @@
 
 ---
 
-## .omc/decisions/architecture-review.md (architect → 오케스트레이터)
+## .claude/memory/decisions/architecture-review.md (architect → 오케스트레이터)
 
 ```markdown
 # 아키텍처 리뷰 결과
@@ -147,7 +147,7 @@
 
 ---
 
-## .omc/artifacts/prd.md (pm → planner, designer)
+## .claude/memory/artifacts/prd.md (pm → planner, designer)
 
 ```markdown
 # PRD: [제품/기능명]
@@ -181,7 +181,7 @@
 
 ---
 
-## .omc/artifacts/design-spec.md (designer → planner, frontend)
+## .claude/memory/artifacts/design-spec.md (designer → planner, frontend)
 
 ```markdown
 # 디자인 스펙: [기능명]
@@ -226,7 +226,7 @@
 
 ---
 
-## .omc/notepads/{agent}.md (구현 에이전트 공통 형식)
+## .claude/memory/notepads/{agent}.md (구현 에이전트 공통 형식)
 
 > frontend, backend, dba, ai-server, executor 각각 자신의 이름으로 작성합니다.
 
@@ -252,7 +252,7 @@
 
 ---
 
-## .omc/notepads/integration-tests.md (integration-tester → 오케스트레이터)
+## .claude/memory/notepads/integration-tests.md (integration-tester → 오케스트레이터)
 
 ```markdown
 # 통합 테스트 결과
@@ -284,7 +284,7 @@
 
 ---
 
-## .omc/notepads/unit-tests.md (unit-tester → code-reviewer)
+## .claude/memory/notepads/unit-tests.md (unit-tester → code-reviewer)
 
 ```markdown
 # 유닛 테스트 결과
@@ -309,7 +309,7 @@
 
 ---
 
-## .omc/workflow-state.md (오케스트레이터 전용)
+## .claude/memory/workflow-state.md (오케스트레이터 전용)
 
 > 오케스트레이터가 매 Phase 전환 시 업데이트합니다.
 > 에이전트는 이 파일을 읽지 않습니다.

@@ -43,14 +43,14 @@
 
 - 사용자 요청
 - 관련 컨텍스트
-- .omc/에서 필요한 정보
+- .claude/memory/에서 필요한 정보
 
 ---
 
 ## 출력
 
 ### 산출물 위치
-`.omc/[directory]/[filename].md`
+`.claude/memory/[directory]/[filename].md`
 
 ### 출력 형식
 ```markdown

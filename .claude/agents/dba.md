@@ -243,7 +243,7 @@ model Tag {
 
 ## 작업 기록
 
-`.omc/notepads/dba.md`에 추가:
+`.claude/memory/notepads/dba.md`에 추가:
 
 ```markdown
 ## [작업명]

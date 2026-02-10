@@ -96,7 +96,7 @@ compose researcher → planner → dba → (frontend | backend) → unit-tester 
 
 ### 2. 컨텍스트 전달
 각 단계의 결과는 다음 단계의 컨텍스트로 전달됩니다:
-- 이전 에이전트의 산출물 (.omc/ 파일)
+- 이전 에이전트의 산출물 (.claude/memory/ 파일)
 - 이전 단계에서 생성/수정된 코드 파일
 
 ### 3. 실행
@@ -113,10 +113,10 @@ Step 3: Task(unit-tester, 작업)
 ## Persistent Context 자동 로드
 
 compose 실행 시 자동으로 로드되는 컨텍스트:
-- `.omc/context/preferences.md` - 사용자 선호도
-- `.omc/context/tech-stack.md` - 기술 스택
-- `.omc/context/conventions.md` - 코딩 컨벤션
-- `.omc/context/project-state.md` - 프로젝트 상태
+- `.claude/memory/context/preferences.md` - 사용자 선호도
+- `.claude/memory/context/tech-stack.md` - 기술 스택
+- `.claude/memory/context/conventions.md` - 코딩 컨벤션
+- `.claude/memory/context/project-state.md` - 프로젝트 상태
 
 ---
 
@@ -152,7 +152,7 @@ compose backend:API 구현
 ### 에이전트 실패 시
 ```
 Step N에서 에이전트 실패:
-  → references/error-recovery.md 절차 따름
+  → .claude/references/error-recovery.md 절차 따름
   → 같은 Step 재시도 (최대 2회)
   → 2회 실패 시 → 사용자에게 보고, 파이프라인 중단
 ```
@@ -166,4 +166,4 @@ Step 2: [frontend, backend] 중 backend만 실패:
 ```
 
 compose는 파이프라인 실행 시 항상 workflow-state.md를 생성합니다.
-(생성/삭제 조건: `references/output-contracts.md`의 workflow-state 섹션 참조)
+(생성/삭제 조건: `.claude/references/output-contracts.md`의 workflow-state 섹션 참조)

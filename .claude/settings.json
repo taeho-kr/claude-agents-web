@@ -35,7 +35,7 @@
     "description": "Multi-agent development system for web services"
   },
   "agents": {
-    "directory": "agents",
+    "directory": ".claude/agents",
     "available": [
       "pm",
       "planner",
@@ -54,12 +54,12 @@
     ]
   },
   "memory": {
-    "directory": ".omc",
+    "directory": ".claude/memory",
     "persistent": {
-      "preferences": ".omc/context/preferences.md",
-      "tech_stack": ".omc/context/tech-stack.md",
-      "conventions": ".omc/context/conventions.md",
-      "project_state": ".omc/context/project-state.md"
+      "preferences": ".claude/memory/context/preferences.md",
+      "tech_stack": ".claude/memory/context/tech-stack.md",
+      "conventions": ".claude/memory/context/conventions.md",
+      "project_state": ".claude/memory/context/project-state.md"
     },
     "session": {
       "plans": "작업 계획 (planner 작성)",
@@ -70,7 +70,7 @@
     }
   },
   "skills": {
-    "directory": "skills",
+    "directory": ".claude/skills",
     "available": [
       "auth-flow",
       "crud-feature",
@@ -78,7 +78,7 @@
     ]
   },
   "commands": {
-    "directory": "commands",
+    "directory": ".claude/commands",
     "available": [
       "autopilot",
       "compose",

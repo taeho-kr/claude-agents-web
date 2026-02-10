@@ -1,6 +1,6 @@
 # Persistent Memory 작성 예시
 
-> 빈 템플릿(.omc/context/)을 채울 때 참고하는 예시입니다.
+> 빈 템플릿(.claude/memory/context/)을 채울 때 참고하는 예시입니다.
 > 아래 예시는 "Next.js 블로그 플랫폼" 가상 프로젝트 기준입니다.
 
 ---

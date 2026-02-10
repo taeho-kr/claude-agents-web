@@ -69,7 +69,7 @@
 
 ## 출력 형식
 
-`.omc/decisions/code-review.md`에 추가:
+`.claude/memory/decisions/code-review.md`에 추가:
 
 ```markdown
 # 코드 리뷰: [파일/기능명]

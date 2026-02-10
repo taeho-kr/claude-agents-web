@@ -19,8 +19,8 @@
 
 ## 산출물 규칙
 
-- 산출물은 반드시 `references/output-contracts.md`에 정의된 포맷을 따름
-- .omc/ 파일 작성 시 필수 섹션 누락 금지
+- 산출물은 반드시 `.claude/references/output-contracts.md`에 정의된 포맷을 따름
+- .claude/memory/ 파일 작성 시 필수 섹션 누락 금지
 - 결과물의 첫 줄에 요약(PASS/FAIL, 수량 등) 포함
 
 ## 보안
@@ -31,6 +31,6 @@
 
 ## 협업
 
-- 이전 에이전트의 산출물(.omc/)을 반드시 읽고 작업 시작
-- 작업 완료 후 자신의 산출물을 .omc/에 기록
+- 이전 에이전트의 산출물(.claude/memory/)을 반드시 읽고 작업 시작
+- 작업 완료 후 자신의 산출물을 .claude/memory/에 기록
 - 다른 에이전트의 산출물을 덮어쓰지 않음 (append 또는 별도 파일)

@@ -205,7 +205,7 @@ npx playwright test
 
 ## 출력 형식
 
-`.omc/notepads/integration-tests.md`에 추가:
+`.claude/memory/notepads/integration-tests.md`에 추가:
 
 ```markdown
 ## [타임스탬프] Integration Test: [시나리오]

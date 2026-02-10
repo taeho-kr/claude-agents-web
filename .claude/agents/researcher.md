@@ -22,7 +22,7 @@
 | Glob | ✅ | 파일 패턴 검색 |
 | Grep | ✅ | 코드 내 텍스트 검색 |
 | WebSearch | ✅ | 기술 문서 검색 |
-| Write | ✅ | 분석 결과 저장 (.omc/) |
+| Write | ✅ | 분석 결과 저장 (.claude/memory/) |
 | Edit | ❌ | - |
 | Bash | ❌ | - |
 
@@ -56,7 +56,7 @@
 
 ## 출력
 
-`.omc/context/codebase.md`에 작성합니다.
+`.claude/memory/context/codebase.md`에 작성합니다.
 
 **기존 codebase.md가 있는 경우:**
 전체 덮어쓰기하되, 기존 파일의 "프로젝트 구조"와 "기술 스택" 섹션은 유지하고
@@ -158,6 +158,6 @@ Read: 발견된 주요 파일들
 
 ## 협업
 
-- **Receives from**: 사용자 요청, Persistent Context (.omc/context/)
+- **Receives from**: 사용자 요청, Persistent Context (.claude/memory/context/)
 - **Delivers to**: planner (코드베이스 분석), analyst (기존 코드 정보), 구현 에이전트들
 - **Collaborates with**: analyst (Phase 1에서 병렬 실행 가능)

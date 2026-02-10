@@ -6,25 +6,25 @@
 
 ## 세션 상태 관리
 
-### .omc/workflow-state.md (워크플로우 실행 중)
+### .claude/memory/workflow-state.md (워크플로우 실행 중)
 
 에이전트 위임 워크플로우 실행 중 상태를 추적합니다.
-포맷: `references/output-contracts.md`의 workflow-state 섹션 참조.
+포맷: `.claude/references/output-contracts.md`의 workflow-state 섹션 참조.
 
 - 워크플로우 시작 시 생성, 종료 시 삭제
 - Phase 진행, 에이전트 호출 기록, 재시도 카운터, 비용 가드 포함
 - 세션이 끊어져도 이 파일로 워크플로우 복원 가능
 
-### 에이전트별 작업 기록 (.omc/notepads/{agent}.md)
+### 에이전트별 작업 기록 (.claude/memory/notepads/{agent}.md)
 
 각 구현 에이전트는 자신의 이름으로 notepad에 작업 결과를 기록합니다.
-포맷: `references/output-contracts.md`의 구현 에이전트 공통 형식 참조.
+포맷: `.claude/references/output-contracts.md`의 구현 에이전트 공통 형식 참조.
 
 ---
 
 ## 에이전트 호출 시 컨텍스트 선택
 
-모든 .omc/ 파일을 매번 전달하면 토큰이 낭비됩니다.
+모든 .claude/memory/ 파일을 매번 전달하면 토큰이 낭비됩니다.
 에이전트 역할에 따라 필요한 컨텍스트만 선택합니다.
 
 ### 분석/기획 에이전트
@@ -36,17 +36,17 @@
 ### 구현 에이전트 (frontend, backend, dba, ai-server, executor)
 ```
 필수: Persistent Context
-필수: .omc/plans/current.md (해당 에이전트 부분만 발췌)
-선택: .omc/context/codebase.md (관련 섹션만)
-선택: .omc/notepads/requirements.md (관련 요구사항만)
+필수: .claude/memory/plans/current.md (해당 에이전트 부분만 발췌)
+선택: .claude/memory/context/codebase.md (관련 섹션만)
+선택: .claude/memory/notepads/requirements.md (관련 요구사항만)
 ```
 
 ### 검증 에이전트 (unit-tester, code-reviewer, architect)
 ```
 필수: Persistent Context
 필수: 검증 대상 코드 파일 경로
-선택: .omc/plans/current.md (의도 파악용)
-선택: .omc/notepads/requirements.md (요구사항 대조용)
+선택: .claude/memory/plans/current.md (의도 파악용)
+선택: .claude/memory/notepads/requirements.md (요구사항 대조용)
 ```
 
 ---

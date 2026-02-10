@@ -25,7 +25,7 @@ claude
 
 1. **Git 초기화**: dev-ai clone인 경우 템플릿 git 히스토리 자동 제거
 2. **프로젝트 설정**: 기술 스택, 컨벤션, 선호도 질문
-3. **Persistent Context 생성**: `.omc/context/` 파일 작성
+3. **Persistent Context 생성**: `.claude/memory/context/` 파일 작성
 
 이후 실행부터는 초기화 과정 없이 바로 작업 가능합니다.
 
@@ -43,31 +43,37 @@ claude
 
 ```
 your-project/
-├── CLAUDE.md              # 마스터 오케스트레이터 (진입점)
-├── AGENTS.md              # 에이전트 레퍼런스
-├── agents/                # 14개 에이전트 프롬프트
-│   ├── _common.md         #   공통 규칙
-│   ├── _template.md       #   새 에이전트 템플릿
-│   └── {name}.md          #   개별 에이전트
-├── commands/              # 5개 명령어
-│   ├── autopilot.md       #   전체 자동 실행
-│   ├── compose.md         #   자유 파이프라인
-│   ├── parallel.md        #   병렬 실행
-│   ├── review.md          #   코드/아키텍처 리뷰
-│   └── integration-test.md#   통합 테스트
-├── skills/                # 3개 재사용 패턴
-│   ├── auth-flow.md       #   인증 시스템
-│   ├── crud-feature.md    #   CRUD 기능
-│   └── api-integration.md #   외부 API 연동
-├── references/            # 상세 규칙/절차
-│   ├── output-contracts.md#   산출물 필수 포맷
-│   ├── error-recovery.md  #   에러 복구 절차
-│   ├── session-management.md# 세션 컨텍스트 관리
-│   ├── external-integration.md# 외부 도구 연동
-│   └── persistent-memory-examples.md# PM 작성 예시
-├── .omc/                  # Shared Memory
-│   └── context/           #   Persistent Context (git 추적)
-└── .claude/settings.json  # 시스템 설정
+├── CLAUDE.md                # 마스터 오케스트레이터 (진입점)
+├── README.md                # 프로젝트 설명
+└── .claude/
+    ├── settings.json        # 시스템 설정
+    ├── agents/              # 14개 에이전트 프롬프트
+    │   ├── _common.md       #   공통 규칙
+    │   ├── _template.md     #   새 에이전트 템플릿
+    │   └── {name}.md        #   개별 에이전트
+    ├── commands/            # 5개 명령어
+    │   ├── autopilot.md     #   전체 자동 실행
+    │   ├── compose.md       #   자유 파이프라인
+    │   ├── parallel.md      #   병렬 실행
+    │   ├── review.md        #   코드/아키텍처 리뷰
+    │   └── integration-test.md
+    ├── skills/              # 3개 재사용 패턴
+    │   ├── auth-flow.md     #   인증 시스템
+    │   ├── crud-feature.md  #   CRUD 기능
+    │   └── api-integration.md
+    ├── references/          # 상세 규칙/절차
+    │   ├── output-contracts.md
+    │   ├── error-recovery.md
+    │   ├── session-management.md
+    │   ├── external-integration.md
+    │   └── persistent-memory-examples.md
+    └── memory/              # Shared Memory
+        ├── context/         #   Persistent Context (git 추적)
+        ├── plans/           #   작업 계획
+        ├── notepads/        #   작업 메모
+        ├── decisions/       #   결정 사항
+        ├── artifacts/       #   산출물
+        └── reports/         #   분석 보고서
 ```
 
 ---
@@ -120,7 +126,7 @@ Phase 4: 검증     → [unit-tester] → [code-reviewer]
 
 ## Persistent Memory
 
-`.omc/context/`의 4개 파일이 세션 간 프로젝트 지식을 유지합니다:
+`.claude/memory/context/`의 4개 파일이 세션 간 프로젝트 지식을 유지합니다:
 
 | 파일 | 내용 | 갱신 시점 |
 |------|------|----------|
@@ -129,7 +135,7 @@ Phase 4: 검증     → [unit-tester] → [code-reviewer]
 | conventions.md | 코딩 컨벤션 | 컨벤션 합의 시 |
 | project-state.md | 프로젝트 진행 상태 | 매 작업 완료 시 |
 
-작성 예시: `references/persistent-memory-examples.md`
+작성 예시: `.claude/references/persistent-memory-examples.md`
 
 ---
 

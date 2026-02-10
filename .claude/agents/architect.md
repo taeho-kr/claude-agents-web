@@ -64,7 +64,7 @@
 
 ## 출력 형식
 
-`.omc/decisions/architecture-review.md`에 추가:
+`.claude/memory/decisions/architecture-review.md`에 추가:
 
 ```markdown
 # 아키텍처 검토: [기능/모듈명]
@@ -140,7 +140,7 @@
 - 사용자에게 보고 + 개입 요청
 - 근본적인 설계 재검토 필요시 아키텍처 재설계 제안
 
-> 시스템 전체 규칙 (`references/error-recovery.md`)과 일치합니다.
+> 시스템 전체 규칙 (`.claude/references/error-recovery.md`)과 일치합니다.
 
 ---
 

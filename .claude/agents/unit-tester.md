@@ -202,7 +202,7 @@ npm test -- --coverage --collectCoverageFrom='src/**/*.{ts,tsx}'
 
 ## 출력 형식
 
-테스트 완료 후 `.omc/notepads/unit-tests.md`에 추가:
+테스트 완료 후 `.claude/memory/notepads/unit-tests.md`에 추가:
 
 ```markdown
 ## [타임스탬프] Unit Test: [대상]
