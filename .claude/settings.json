@@ -48,24 +48,8 @@
     "name": "dev-ai",
     "description": "Multi-agent development system for web services"
   },
-  "agents": {
-    "directory": ".claude/agents",
-    "available": [
-      "pm",
-      "planner",
-      "researcher",
-      "analyst",
-      "designer",
-      "executor",
-      "frontend",
-      "backend",
-      "ai-server",
-      "dba",
-      "architect",
-      "code-reviewer",
-      "unit-tester",
-      "integration-tester"
-    ]
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
   },
   "memory": {
     "directory": ".claude/memory",

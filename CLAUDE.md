@@ -84,15 +84,24 @@
 
 ---
 
-## 에이전트 호출
+## 에이전트 호출 (네이티브 서브에이전트)
 
-에이전트 호출 전 반드시:
-1. `.claude/agents/{name}.md` + `.claude/agents/_common.md` 읽기
-2. Persistent Context 중 필요한 것만 선별 전달
-3. 독립 작업은 하나의 메시지에서 여러 Task 동시 호출
+에이전트는 `Task({ subagent_type: "{name}" })`로 호출합니다.
+Claude Code가 모델, 도구, 턴 제한, 스킬을 **자동 적용**합니다.
 
-Task 템플릿, 모델 라우팅, 컨텍스트 선별 기준:
-→ `.claude/references/orchestrator-protocol.md`
+```javascript
+Task({
+  subagent_type: "{agent-name}",  // agents/{name}.md의 name 필드
+  prompt: "Persistent Context + 작업 컨텍스트 + 지시사항",
+  description: "{agent}: {요약}"
+})
+```
+
+- 에이전트 프롬프트/공통 규칙 수동 로드 불필요 (frontmatter + skills 자동 처리)
+- Persistent Context 중 필요한 것만 prompt에 선별 전달
+- 독립 작업은 하나의 메시지에서 여러 Task 동시 호출
+
+상세 프로토콜: `.claude/references/orchestrator-protocol.md`
 
 ---
 

@@ -47,26 +47,28 @@ your-project/
 ├── README.md                # 프로젝트 설명
 └── .claude/
     ├── settings.json        # 시스템 설정
-    ├── agents/              # 14개 에이전트 프롬프트
-    │   ├── _common.md       #   공통 규칙
+    ├── agents/              # 14개 네이티브 서브에이전트 (YAML frontmatter)
     │   ├── _template.md     #   새 에이전트 템플릿
-    │   └── {name}.md        #   개별 에이전트
+    │   └── {name}.md        #   개별 에이전트 (name, tools, model, skills 정의)
     ├── commands/            # 5개 명령어
     │   ├── autopilot.md     #   전체 자동 실행
     │   ├── compose.md       #   자유 파이프라인
     │   ├── parallel.md      #   병렬 실행
     │   ├── review.md        #   코드/아키텍처 리뷰
     │   └── integration-test.md
-    ├── skills/              # 3개 재사용 패턴
+    ├── skills/              # 재사용 패턴 + 에이전트 공통 규칙
+    │   ├── agent-common.md  #   에이전트 공통 규칙 (자동 주입)
     │   ├── auth-flow.md     #   인증 시스템
     │   ├── crud-feature.md  #   CRUD 기능
     │   └── api-integration.md
     ├── references/          # 상세 규칙/절차
+    │   ├── orchestrator-protocol.md
     │   ├── output-contracts.md
     │   ├── error-recovery.md
     │   ├── session-management.md
     │   ├── external-integration.md
-    │   └── persistent-memory-examples.md
+    │   ├── persistent-memory-examples.md
+    │   └── instinct-learning.md
     └── memory/              # Shared Memory
         ├── context/         #   Persistent Context (git 추적)
         ├── plans/           #   작업 계획
@@ -91,26 +93,39 @@ your-project/
 ### autopilot 워크플로우
 
 ```
-Phase 1: 분석     → [researcher] + [analyst] (병렬)
-Phase 2: 설계     → [planner] + [designer]
-Phase 3: 구현     → [dba] → [frontend | backend] (병렬)
-Phase 4: 검증     → [unit-tester] → [code-reviewer]
-                   → FAIL → 피드백 루프 (최대 2회) → PASS → 완료
+Phase 1:   분석     → [researcher] + [analyst] (병렬)
+Phase 1.5: 결정 잠금 → 오케스트레이터 ↔ 사용자 (기술/범위 확정)
+Phase 2:   설계     → [planner] + [designer]
+Phase 3:   구현     → [dba] → [frontend | backend] (병렬)
+Phase 4:   검증     → [unit-tester] → [code-reviewer]
+                     → FAIL → 피드백 루프 (최대 3회) → PASS → 완료
 ```
 
 각 Phase 완료 시 git checkpoint 자동 생성. 실패 시 롤백 가능.
 
 ---
 
-## 에이전트 (14개)
+## 에이전트 (14개 네이티브 서브에이전트)
 
-| 카테고리 | 에이전트 | 역할 |
-|----------|----------|------|
-| 기획 | pm | PRD, 유저 스토리 |
-| 분석 | planner, researcher, analyst | 작업 분해, 코드 분석, 요구사항 |
-| 디자인 | designer | UI/UX 스펙 |
-| 실행 | executor, frontend, backend, ai-server, dba | 코드 구현 |
-| 검증 | architect, code-reviewer, unit-tester, integration-tester | 품질 검증 |
+각 에이전트는 `.claude/agents/{name}.md`에 YAML frontmatter로 정의됩니다.
+Claude Code가 모델 라우팅, 도구 제한, 스킬 주입을 자동 처리합니다.
+
+| 카테고리 | 에이전트 | 역할 | 모델 |
+|----------|----------|------|------|
+| 기획 | pm | PRD, 유저 스토리 | inherit |
+| 분석 | researcher, analyst | 코드 분석, 요구사항 | haiku |
+| 설계 | planner, designer | 작업 분해, UI/UX 스펙 | inherit |
+| 실행 | executor | 범용 실행 | haiku |
+| 실행 | frontend, backend, ai-server, dba | 전문 구현 | inherit |
+| 검증 | architect, code-reviewer | 아키텍처/코드 리뷰 (읽기전용) | opus |
+| 검증 | unit-tester | 유닛 테스트 ⚡자동 | haiku |
+| 검증 | integration-tester | E2E 테스트 | inherit |
+
+### Agent Teams (실험적)
+
+3개 이상 에이전트가 동시 작업하고 에이전트 간 소통이 필요한 경우,
+Agent Teams로 공유 태스크 리스트 기반 자율 협업이 가능합니다.
+기본값은 일반 서브에이전트 병렬 호출입니다.
 
 ---
 

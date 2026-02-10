@@ -84,42 +84,24 @@ HAS_GIT = true AND ORIGIN_URL에 "dev-ai" 미포함
 
 ---
 
-## 에이전트 호출 프로토콜
+## 에이전트 호출 프로토콜 (네이티브 서브에이전트)
 
-### 호출 순서
+각 에이전트는 `.claude/agents/{name}.md`에 YAML frontmatter로 정의됩니다.
+Claude Code가 **모델 라우팅, 도구 제한, 턴 제한, 스킬 주입**을 자동 처리합니다.
 
-```
-1. Persistent Context 로드 (.claude/memory/context/)
-2. 에이전트 프롬프트 로드 (.claude/agents/{name}.md)
-3. 공통 규칙 로드 (.claude/agents/_common.md)
-4. Task 생성 (아래 템플릿)
-5. 병렬 실행: 독립 작업은 하나의 메시지에서 여러 Task 동시 호출
-```
-
-### Task 템플릿
+### 호출 방식
 
 ```javascript
+// 네이티브 서브에이전트 호출 (프롬프트/모델/도구 자동 로드)
 Task({
-  subagent_type: "general-purpose",
-  model: /* 아래 모델 라우팅 규칙 참조 */,
-  max_turns: /* 분석:15, 구현:25, 검증:10 */,
+  subagent_type: "{agent-name}",   // agents/{name}.md의 name 필드
   prompt: `
-${에이전트 프롬프트}
-
----
-## 공통 규칙
-${.claude/agents/_common.md 내용}
-
----
 ## Persistent Context
-${기술스택}
-${컨벤션}
-${선호도}
+${tech-stack, conventions, preferences 중 필요한 것}
 
----
 ## 현재 작업
 ### 컨텍스트
-${관련 컨텍스트 - 역할에 따라 필요한 것만 선별}
+${관련 산출물 (codebase.md, requirements.md 등)}
 ### 할 일
 ${구체적인 작업 지시}
 ### 완료 기준
@@ -131,15 +113,27 @@ ${해당 에이전트의 output-contracts 포맷}
 })
 ```
 
-### 모델 라우팅 (티어별)
+### 자동 처리 항목 (frontmatter에서 정의)
+
+| 항목 | 이전 (수동) | 현재 (자동) |
+|------|-------------|-------------|
+| 에이전트 프롬프트 | `Read(agents/{name}.md)` | frontmatter + 본문 자동 로드 |
+| 공통 규칙 | `Read(agents/_common.md)` | `skills: [agent-common]` 자동 주입 |
+| 모델 라우팅 | `model:` 파라미터 직접 지정 | frontmatter `model:` 자동 적용 |
+| 도구 제한 | 프롬프트로 지시 | frontmatter `tools:` 강제 적용 |
+| 턴 제한 | `max_turns:` 파라미터 | frontmatter `maxTurns:` 자동 적용 |
+
+### 모델 라우팅 (frontmatter에 정의됨)
 
 | 티어 | 모델 | 에이전트 | 근거 |
 |------|------|----------|------|
 | Critical | opus | architect, code-reviewer | 아키텍처/보안 판단 정확도 |
-| Standard | (생략=상속) | frontend, backend, dba, ai-server, planner | 복잡한 구현/설계 |
+| Standard | inherit | frontend, backend, dba, ai-server, planner, designer, pm, integration-tester | 복잡한 구현/설계 |
 | Fast | haiku | researcher, analyst, unit-tester, executor | 탐색/실행 속도 |
 
 ### 컨텍스트 선별 기준
+
+오케스트레이터가 `prompt`에 주입할 컨텍스트만 결정합니다.
 
 ```
 분석/기획 에이전트:
@@ -338,35 +332,19 @@ Phase 전환         → Phase 상태 + git checkpoint
 
 ## 에이전트 지연 로딩
 
-에이전트 프롬프트(`.claude/agents/{name}.md`)는 **해당 에이전트를 호출할 때만** 읽습니다.
+네이티브 서브에이전트는 `Task({ subagent_type: "{name}" })` 호출 시 **자동으로 로드**됩니다.
+오케스트레이터가 수동으로 에이전트 프롬프트를 읽을 필요가 없습니다.
 
-### 원칙
+### Phase별 호출 대상
 
-```
-❌ 세션 시작 시 14개 에이전트 프롬프트 전부 로드
-✅ 해당 Phase 진입 시 필요한 에이전트만 로드
-```
-
-### 로딩 시점
-
-| Phase | 로드 대상 | 시점 |
+| Phase | 호출 대상 | 비고 |
 |-------|----------|------|
 | Phase 0 | 없음 | 초기화는 오케스트레이터 직접 처리 |
-| Phase 1 | researcher, analyst | Phase 1 진입 시 |
+| Phase 1 | researcher, analyst | 병렬 호출 |
 | Phase 1.5 | 없음 | 오케스트레이터가 직접 결정 잠금 |
-| Phase 2 | planner, designer | Phase 2 진입 시 |
-| Phase 3 | dba, frontend, backend, ai-server | Phase 3 진입 시 (필요한 것만) |
-| Phase 4 | unit-tester, code-reviewer | Phase 4 진입 시 |
-
-### 로드 절차
-
-```
-1. Read(".claude/agents/{name}.md")       ← 해당 에이전트
-2. Read(".claude/agents/_common.md")      ← 공통 규칙 (캐싱 가능)
-3. Task 프롬프트에 삽입
-```
-
-`_common.md`는 첫 에이전트 호출 시 1회 읽고, 같은 세션 내 재사용.
+| Phase 2 | planner, designer | UI 작업 포함 시 병렬 |
+| Phase 3 | dba, frontend, backend, ai-server | 필요한 것만, 의존성 순서 |
+| Phase 4 | unit-tester, code-reviewer | 순차 실행 |
 
 ---
 
@@ -477,3 +455,47 @@ Phase 4:   검증     → [unit-tester] → [code-reviewer]
 - 단순 버그 수정 (결정할 것 없음)
 - 이전 결정이 그대로 유효한 반복 작업
 - 사용자가 명시적으로 모든 결정을 지시한 경우
+
+---
+
+## Agent Teams를 이용한 병렬 실행 (opt-in)
+
+> 실험적 기능. 환경변수 `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` 필요.
+
+Agent Teams는 여러 Claude Code 인스턴스가 **공유 태스크 리스트와 메시징**으로 협업하는 기능입니다.
+기본값은 일반 서브에이전트 병렬 호출(현행)이며, 특정 조건에서만 Teams 사용을 고려합니다.
+
+### 서브에이전트 vs Agent Teams
+
+| 특성 | 서브에이전트 (기본) | Agent Teams |
+|------|-------------------|-------------|
+| 통신 | 결과만 반환 | 에이전트 간 메시징 가능 |
+| 조율 | 오케스트레이터가 모든 결과 종합 | 공유 태스크 리스트로 자율 조율 |
+| 오버헤드 | 낮음 | 높음 (별도 인스턴스) |
+| 적합 상황 | 독립적인 병렬 작업 | 에이전트 간 소통이 필요한 작업 |
+
+### 사용 조건
+
+```
+다음 조건이 모두 참일 때 Agent Teams 사용을 고려:
+1. 3개 이상 에이전트가 동시 작업
+2. 에이전트 간 소통 필요 (예: frontend가 backend에 API 스펙 질문)
+3. 공유 태스크 리스트로 자동 조율이 유리한 경우
+```
+
+### Agent Teams 워크플로우
+
+```
+1. 오케스트레이터가 Team Lead 역할
+2. 에이전트별 Teammate 생성 (서브에이전트 설정 상속)
+3. 공유 태스크 리스트에 Phase 3 작업 등록
+4. Teammate들이 자율적으로 태스크 claim → 완료
+5. Lead가 결과 종합 → Phase 4로 진행
+```
+
+### 제한사항
+
+- 실험적 기능 (세션 재개 시 teammate 복원 안됨)
+- VS Code 통합 터미널에서 split-pane 미지원
+- 토큰 비용이 서브에이전트 대비 높음
+- 기본값은 일반 서브에이전트 병렬 호출 유지

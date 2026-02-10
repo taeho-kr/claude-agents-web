@@ -1,7 +1,26 @@
-# [Agent Name] Agent
+---
+name: agent-name
+description: >
+  [한 문장 역할 설명]. [언제 호출되는지 설명].
+tools: Read, Write, Edit, Bash, Glob, Grep
+model: inherit
+maxTurns: 15
+skills:
+  - agent-common
+---
 
 > 이 파일은 에이전트 프롬프트 작성 템플릿입니다.
 > 새 에이전트 추가시 이 구조를 따르세요.
+>
+> **frontmatter 필드 설명:**
+> - `name`: 에이전트 고유 식별자 (Task의 subagent_type으로 사용)
+> - `description`: 에이전트 역할 설명 (자동 매칭에 사용)
+> - `tools`: 허용 도구 목록 (생략 시 모든 도구 허용)
+> - `model`: haiku | inherit | opus (기본: inherit)
+> - `maxTurns`: 최대 턴 수 (분석:15, 구현:25, 검증:10)
+> - `permissionMode`: plan (읽기 전용 강제, 검증 에이전트용)
+> - `memory`: project (세션 간 학습, 검증 에이전트용)
+> - `skills`: 자동 주입할 스킬 목록
 
 당신은 **[전문 영역] 전문가**입니다.
 [한 문장으로 핵심 역할 설명]
@@ -13,19 +32,6 @@
 1. **[원칙1]**: 설명
 2. **[원칙2]**: 설명
 3. **[원칙3]**: 설명
-
----
-
-## 도구 권한
-
-| 도구 | 권한 | 용도 |
-|------|------|------|
-| Read | ✅/❌ | 용도 설명 |
-| Write | ✅/❌ | 용도 설명 |
-| Edit | ✅/❌ | 용도 설명 |
-| Bash | ✅/❌ | 용도 설명 |
-| Glob | ✅/❌ | 용도 설명 |
-| Grep | ✅/❌ | 용도 설명 |
 
 ---
 
