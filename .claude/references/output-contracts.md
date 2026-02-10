@@ -62,6 +62,8 @@
 
 ## .claude/memory/plans/current.md (planner → 구현 에이전트)
 
+> XML 구조화 태스크: 각 task에 검증 명령과 완료 기준을 내장합니다.
+
 ```markdown
 # 작업 계획: [제목]
 
@@ -70,25 +72,48 @@
 
 ## 단계
 
-### Phase 1: [이름]
-<!-- (병렬 가능) 또는 (순차) 명시 -->
-- [ ] **[에이전트명]** 구체적 작업 설명
-  - 입력: [필요한 정보/파일]
-  - 출력: [생성할 파일/변경 사항]
+### Phase 1: [이름] (병렬/순차)
 
-### Phase 2: [이름]
-- [ ] **[에이전트명]** 구체적 작업 설명
+<task agent="[에이전트명]" type="auto">
+  <name>태스크 제목</name>
+  <files>생성/수정할 파일 경로</files>
+  <action>구체적인 구현 지시</action>
+  <verify>실행 가능한 검증 명령어 (빌드, 테스트, curl 등)</verify>
+  <done>완료 판단 기준 (사람이 읽을 수 있는 형태)</done>
+</task>
 
-### Phase 3: 검증
-- [ ] **[unit-tester]** 테스트 대상 명시
-- [ ] **[code-reviewer]** 리뷰 관점 명시
+### Phase N: 검증
 
-## 의존성
-<!-- Phase 간 의존 관계 한 줄 -->
+<task agent="unit-tester" type="auto">
+  <name>유닛 테스트</name>
+  <files>테스트 파일 경로</files>
+  <action>테스트 대상 명시</action>
+  <verify>테스트 실행 명령어</verify>
+  <done>전체 통과, 커버리지 기준</done>
+</task>
 
 ## 파일 영향 범위
-<!-- 생성/수정 예상 파일 목록 -->
+<!-- 에이전트별 수정 가능 범위 (병렬 안전) -->
+| 에이전트 | 파일 범위 |
+|----------|----------|
+| [agent1] | path/pattern/** |
+| [agent2] | path/pattern/** |
+
+## 공유 파일 (순차 실행 필수)
+<!-- 두 에이전트 이상이 수정할 수 있는 파일 → 실행 순서 명시 -->
 ```
+
+### task 요소 설명
+
+| 속성 | 설명 |
+|------|------|
+| `agent` | 실행 에이전트 |
+| `type` | `auto` (자동 검증) / `manual` (수동 확인 필요) |
+| `<name>` | 태스크 제목 |
+| `<files>` | 생성/수정 대상 파일 |
+| `<action>` | 구체적인 구현 지시 |
+| `<verify>` | 실행 가능한 검증 명령어 |
+| `<done>` | 완료 판단 기준 |
 
 ---
 
@@ -370,3 +395,36 @@
 | Phase 1 | abc1234 | git reset --hard abc1234 |
 | Phase 2 | def5678 | git reset --hard def5678 |
 ```
+
+---
+
+## .claude/memory/notepads/instincts.md (오케스트레이터 전용)
+
+> 세션에서 관찰된 패턴을 신뢰도 점수와 함께 기록합니다.
+> 상세 규칙: `.claude/references/instinct-learning.md`
+
+```markdown
+# Instinct 후보
+
+## 코딩 스타일
+- [0.3] 패턴 설명 (YYYY-MM-DD 관찰)
+- [0.6] 패턴 설명 (YYYY-MM-DD, YYYY-MM-DD 관찰)
+- [0.9] 패턴 설명 (YYYY-MM-DD 사용자 명시) → 반영됨
+
+## 기술 선택
+- [점수] 패턴 설명 (관찰 이력)
+
+## 워크플로우
+- [점수] 패턴 설명 (관찰 이력)
+
+## 커뮤니케이션
+- [점수] 패턴 설명 (관찰 이력)
+```
+
+### 점수 기준
+
+| 점수 | 의미 | 동작 |
+|------|------|------|
+| 0.3 | 1회 관찰 (후보) | notepads에만 기록 |
+| 0.6 | 2회 관찰 (유력) | Persistent Context 반영 검토 |
+| 0.9 | 3회+ 또는 사용자 명시 (확정) | Persistent Context 확정 반영 |

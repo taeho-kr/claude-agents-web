@@ -1,4 +1,18 @@
 {
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "command": "node .claude/hooks/block-destructive-git.js"
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "command": "node .claude/hooks/typecheck-on-save.js"
+      }
+    ]
+  },
   "permissions": {
     "allow": [
       "Read",
