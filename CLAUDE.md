@@ -45,6 +45,7 @@
 | 명령어 | 설명 | 파일 |
 |--------|------|------|
 | `autopilot` | 전체 워크플로우 자동 실행 | .claude/commands/autopilot.md |
+| `ralph` | 영속 루프 실행 (완료까지 반복) | .claude/commands/ralph.md |
 | `compose` | 에이전트 자유 조합 파이프라인 | .claude/commands/compose.md |
 | `parallel` | 독립 작업 병렬 실행 | .claude/commands/parallel.md |
 | `review` | 코드/아키텍처 리뷰 | .claude/commands/review.md |
@@ -52,7 +53,7 @@
 
 ---
 
-## 에이전트 (14개)
+## 에이전트 (15개)
 
 | 카테고리 | 에이전트 | 역할 | 모델 티어 |
 |----------|----------|------|-----------|
@@ -66,6 +67,7 @@
 | 실행 | `backend` | API, 비즈니스 로직 | standard |
 | 실행 | `ai-server` | ML 서버, 모델 서빙 | standard |
 | 실행 | `dba` | DB 스키마, 마이그레이션 | standard |
+| 실행 | `sisyphus` | 자율 실행 (분석→구현→검증 올인원) | standard |
 | 검증 | `architect` | 아키텍처 검토 (Read 전용) | opus |
 | 검증 | `code-reviewer` | 코드 품질, 보안 (Read 전용) | opus |
 | 검증 | `unit-tester` | 유닛 테스트 ⚡자동 | haiku |

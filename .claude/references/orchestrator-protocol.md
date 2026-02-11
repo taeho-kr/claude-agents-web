@@ -499,3 +499,80 @@ Agent Teams는 여러 Claude Code 인스턴스가 **공유 태스크 리스트�
 - VS Code 통합 터미널에서 split-pane 미지원
 - 토큰 비용이 서브에이전트 대비 높음
 - 기본값은 일반 서브에이전트 병렬 호출 유지
+
+---
+
+## Ralph 영속 루프 프로토콜
+
+### 개요
+
+`ralph` 명령은 sisyphus 에이전트를 반복 호출하여 작업이 완료될 때까지 실행합니다.
+autopilot이 14개 전문 에이전트를 조율하는 반면, ralph은 **단일 자율 에이전트를 반복 실행**합니다.
+
+### autopilot vs ralph 사용 기준
+
+| 상황 | 권장 | 이유 |
+|------|------|------|
+| 대규모 신규 기능 (PRD, 설계, DB, UI, API) | autopilot | 전문 에이전트 깊이 필요 |
+| 중간 규모 기능/리팩토링 | ralph | 빠른 반복, 단일 컨텍스트 효율 |
+| 버그 수정, 성능 개선 | ralph | 집중 반복 적합 |
+| 세션 간 연속 작업 필요 | ralph | loop-state 영속화 |
+| UI/UX 디자인이 중요 | autopilot | designer 에이전트 활용 |
+| 아키텍처 검토 필수 | autopilot | architect(opus) 활용 |
+| "될 때까지" 완료 보장 필요 | ralph | 자동 반복 |
+
+### 루프 관리 규칙
+
+```
+시작:
+  1. loop-state.md 생성
+  2. Persistent Context 로드
+  3. 완료 기준 결정
+
+반복 (1..50):
+  1. 이전 반복 컨텍스트 구성
+  2. Task({ subagent_type: "sisyphus", prompt: ... })
+  3. 결과 평가 + loop-state.md 업데이트
+  4. git commit "[ralph] iteration N: 결과 요약"
+  5. 완료 판단 → 완료/계속/중단
+
+종료:
+  - 완료: loop-state.md 삭제, project-state.md 갱신
+  - 한도 도달/연속 실패: loop-state.md 유지 (재개 가능)
+```
+
+### 연속 실패 감지
+
+매 반복 후 sisyphus의 미완료 사항을 이전 반복과 비교합니다.
+
+```
+같은 미완료 사항이 3회 연속 동일 → 진전 없음 판단 → 자동 중단
+
+예:
+  iteration 3: 미완료 - "TypeScript 타입 에러 해결 불가"
+  iteration 4: 미완료 - "TypeScript 타입 에러 해결 불가"
+  iteration 5: 미완료 - "TypeScript 타입 에러 해결 불가"
+  → 연속 실패 3회 → 자동 중단 + 사용자 보고
+```
+
+### 세션 재개
+
+```
+세션 시작 시:
+  1. loop-state.md 존재 확인
+  2. status가 in_progress 또는 paused인 경우:
+     → 사용자에게 재개 여부 확인 (AskUserQuestion)
+     → 승인: 마지막 iteration + 1부터 재개
+     → 거부: loop-state.md 삭제
+
+ralph --resume:
+  → 사용자 확인 없이 즉시 재개
+```
+
+### 비용 가드
+
+```
+sisyphus max_turns: 50 (per iteration)
+전체 반복 한도: 50회
+연속 실패 한도: 3회
+```

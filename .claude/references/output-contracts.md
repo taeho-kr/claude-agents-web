@@ -398,6 +398,57 @@
 
 ---
 
+## .claude/memory/loop-state.md (ralph 명령 전용)
+
+> ralph 명령 실행 시 생성. sisyphus 반복 호출의 상태를 추적합니다.
+> 세션 간 영속화되며, --resume으로 재개 가능합니다.
+
+### 생성 조건
+
+| 명령 | 생성 여부 | 조건 |
+|------|-----------|------|
+| `ralph` | ✅ 항상 | 영속 루프 실행 |
+| 기타 | ❌ | ralph 전용 |
+
+### 삭제 조건
+
+- 워크플로우 정상 완료 시 삭제
+- 사용자가 명시적으로 취소 시 삭제
+- 한도 도달/연속 실패 시 유지 (재개용)
+
+```markdown
+# Loop State
+
+## 실행 정보
+- **command**: ralph
+- **request**: [사용자 요청 1줄 요약]
+- **completion_criteria**: [완료 기준]
+- **max_iterations**: 50
+- **start**: [타임스탬프]
+- **last_update**: [타임스탬프]
+
+## 진행 상태
+- **current_iteration**: 3
+- **status**: in_progress / completed / failed / paused
+
+## 반복 기록
+| # | 결과 | 변경 파일 수 | 미완료 사항 | commit |
+|---|------|-------------|------------|--------|
+| 1 | partial | 5 | 테스트 미작성 | abc123 |
+| 2 | partial | 3 | 2개 테스트 실패 | def456 |
+| 3 | in_progress | - | - | - |
+
+## 마지막 미완료 사항
+- [ ] 항목1
+- [ ] 항목2
+
+## 연속 실패 카운터
+- **같은 이유 연속 실패**: 0 / 3 (3회 도달 시 자동 중단)
+- **마지막 실패 이유**: -
+```
+
+---
+
 ## .claude/memory/notepads/instincts.md (오케스트레이터 전용)
 
 > 세션에서 관찰된 패턴을 신뢰도 점수와 함께 기록합니다.

@@ -82,7 +82,8 @@
       "compose",
       "parallel",
       "review",
-      "integration-test"
+      "integration-test",
+      "ralph"
     ]
   }
 }
