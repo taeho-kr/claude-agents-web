@@ -1,6 +1,6 @@
 # Orchestrator Protocol (상세 절차)
 
-> CLAUDE.md의 상세 운영 절차. 오케스트레이터가 해당 Phase 진입 시 참조합니다.
+> CLAUDE.md의 3-Step Dynamic Dispatch 상세 운영 절차.
 
 ---
 
@@ -12,7 +12,7 @@
 
 ```
 .claude/memory/.initialized 없음 → 첫 실행 (Git 초기화 절차 실행)
-.claude/memory/.initialized 있음 → 기존 프로젝트 (Phase 1로 스킵)
+.claude/memory/.initialized 있음 → 기존 프로젝트 (Persistent Context 로드로 스킵)
 ```
 
 ### Git 초기화 절차 (첫 실행 시)
@@ -51,7 +51,7 @@ HAS_GIT = true AND ORIGIN_URL에 "dev-ai" 미포함
 3. `git add .`
 4. `git commit -m "chore: init project from dev-ai template"`
 
-### Phase 1: Persistent Context 로드
+### Persistent Context 로드
 
 ```
 1. Read(".claude/memory/context/project-state.md")
@@ -84,6 +84,175 @@ HAS_GIT = true AND ORIGIN_URL에 "dev-ai" 미포함
 
 ---
 
+## 3-Step Dynamic Dispatch 프로토콜
+
+### Step 1: 요청 분석
+
+오케스트레이터가 직접 수행합니다. 에이전트를 호출하지 않습니다.
+
+```
+입력: 사용자 자연어 요청
+
+처리:
+1. 의도 파악
+   - 신규 기능 구현
+   - 버그 수정
+   - 리팩토링
+   - 코드 리뷰
+   - 테스트 작성
+   - 분석/조사
+   - 기타
+
+2. 복잡도 판단
+   - 단순: 에이전트 불필요 (오타 수정, 1줄 변경)
+   - 소규모: 에이전트 1~2개
+   - 중규모: 에이전트 3~5개
+   - 대규모: 에이전트 6개+
+
+3. 스킬 매칭 확인
+   - 키워드가 스킬 패턴과 일치하면 해당 스킬 워크플로우 적용
+   - 미매칭 시 일반 디스패치 진행
+
+출력: 의도 + 복잡도 + 스킬 매칭 여부
+```
+
+#### 단순 요청 처리 (에이전트 불필요)
+
+```
+복잡도가 "단순"인 경우:
+  → 오케스트레이터가 직접 실행
+  → 에이전트 호출 없이 Read/Edit/Write로 처리
+  → 예: 오타 수정, 설정 값 변경, 단순 파일 추가
+```
+
+### Step 2: 에이전트 선택 + 태스크 그래프
+
+오케스트레이터가 직접 수행합니다.
+
+```
+입력: Step 1의 분석 결과
+
+처리:
+1. 필요 에이전트 결정
+   - 각 에이전트의 역할과 요청을 매칭
+   - 불필요한 에이전트는 포함하지 않음
+
+2. 각 에이전트의 구체적 작업 정의
+   - 할 일, 완료 기준, 산출물
+
+3. 에이전트 간 의존성 결정 (DAG)
+   - 의존성 규칙 적용 (아래 참조)
+   - 의존성 없는 에이전트끼리 병렬 가능
+
+4. 모호한 점 확인
+   - 기술 선택, 범위, 접근법이 불명확하면 AskUserQuestion
+   - 확정 후 decisions/ 에 기록
+
+출력: 태스크 그래프 (에이전트 목록 + 의존성 + 작업 정의)
+```
+
+#### 의존성 규칙 (가이드라인)
+
+```
+분석 에이전트 (researcher, analyst)
+  의존성: 없음 (항상 먼저 실행 가능)
+  후속: planner, designer, 구현 에이전트
+
+설계 에이전트 (planner, designer)
+  의존성: 분석이 필요한 경우 researcher/analyst 완료 후
+  후속: 구현 에이전트
+
+DBA (dba)
+  의존성: planner 완료 후 (DB 설계 필요시)
+  후속: frontend, backend (스키마 의존)
+
+구현 에이전트 (frontend, backend, ai-server)
+  의존성: planner 완료 후, dba 완료 후 (DB 사용시)
+  상호간: 파일 범위 겹치지 않으면 병렬 가능
+
+검증 에이전트 (unit-tester, code-reviewer, architect)
+  의존성: 구현 에이전트 완료 후
+  unit-tester → code-reviewer → architect (순차)
+```
+
+이 규칙은 **가이드라인**이며, 오케스트레이터가 요청 맥락에 따라 유연하게 적용합니다.
+예: 단순 버그 수정 시 분석/설계 단계 생략 가능.
+
+#### 사용자 확인 (에이전트 3개 이상)
+
+```
+에이전트 3개 이상인 경우:
+  → 태스크 그래프를 사용자에게 보여주고 AskUserQuestion:
+    "다음과 같이 실행할 예정입니다:
+     1. researcher + analyst (병렬 분석)
+     2. planner (설계)
+     3. dba → frontend + backend (구현)
+     4. unit-tester → code-reviewer (검증)
+     진행할까요?"
+  → 승인 후 Step 3 실행
+  → 사용자가 에이전트를 추가/제거하면 태스크 그래프 재구성
+
+에이전트 1~2개인 경우:
+  → 확인 없이 바로 Step 3 실행
+```
+
+### Step 3: 백그라운드 실행 + 순환 모니터링
+
+#### 실행 시작
+
+```
+1. workflow-state.md 생성 (포맷: output-contracts.md 참조)
+2. 태스크 그래프에서 의존성 없는 에이전트 식별
+3. 해당 에이전트 모두 Task(run_in_background=true)로 실행
+4. workflow-state.md에 task_id 기록
+```
+
+#### 순환 모니터링 루프
+
+```
+while (미완료 에이전트 존재):
+  for each 실행 중인 에이전트:
+    result = TaskOutput(task_id, block=false, timeout=5000)
+
+    if 완료:
+      1. 결과 수집 + workflow-state.md 업데이트 (상태: ✅ 완료)
+      2. 의존성 해소 확인:
+         - 이 에이전트에 의존하는 후속 에이전트 목록 확인
+         - 후속 에이전트의 모든 의존성이 완료되었는지 확인
+         - 모든 의존성 해소 → 후속 에이전트 즉시 백그라운드 실행
+      3. 후속 에이전트 실행 시:
+         - 완료된 에이전트의 산출물을 컨텍스트에 포함
+         - workflow-state.md에 task_id 기록
+
+    if 실패:
+      1. workflow-state.md에 실패 기록
+      2. error-recovery 절차 적용 (아래 참조)
+      3. 재시도 카운터 증가
+```
+
+#### 완료 처리
+
+```
+모든 에이전트 완료:
+  1. 결과 종합 → 사용자에게 보고
+  2. 변경사항 있으면 git add + git commit
+  3. project-state.md 갱신
+  4. workflow-state.md 삭제 또는 완료 표시
+```
+
+#### Git Checkpoint
+
+```
+에이전트 완료 시:
+  → 변경사항이 있으면 git add + git commit "[dispatch] {에이전트}: {요약}"
+  → 커밋 해시를 workflow-state.md에 기록 (롤백 포인트)
+
+실패 시 롤백:
+  → 마지막 성공 checkpoint로 git restore 가능
+```
+
+---
+
 ## 에이전트 호출 프로토콜 (네이티브 서브에이전트)
 
 각 에이전트는 `.claude/agents/{name}.md`에 YAML frontmatter로 정의됩니다.
@@ -95,6 +264,7 @@ Claude Code가 **모델 라우팅, 도구 제한, 턴 제한, 스킬 주입**을
 // 네이티브 서브에이전트 호출 (프롬프트/모델/도구 자동 로드)
 Task({
   subagent_type: "{agent-name}",   // agents/{name}.md의 name 필드
+  run_in_background: true,          // Step 3에서 백그라운드 실행
   prompt: `
 ## Persistent Context
 ${tech-stack, conventions, preferences 중 필요한 것}
@@ -115,20 +285,20 @@ ${해당 에이전트의 output-contracts 포맷}
 
 ### 자동 처리 항목 (frontmatter에서 정의)
 
-| 항목 | 이전 (수동) | 현재 (자동) |
-|------|-------------|-------------|
-| 에이전트 프롬프트 | `Read(agents/{name}.md)` | frontmatter + 본문 자동 로드 |
-| 공통 규칙 | `Read(agents/_common.md)` | `skills: [agent-common]` 자동 주입 |
-| 모델 라우팅 | `model:` 파라미터 직접 지정 | frontmatter `model:` 자동 적용 |
-| 도구 제한 | 프롬프트로 지시 | frontmatter `tools:` 강제 적용 |
-| 턴 제한 | `max_turns:` 파라미터 | frontmatter `maxTurns:` 자동 적용 |
+| 항목 | 설명 |
+|------|------|
+| 에이전트 프롬프트 | frontmatter + 본문 자동 로드 |
+| 공통 규칙 | `skills: [agent-common]` 자동 주입 |
+| 모델 라우팅 | frontmatter `model:` 자동 적용 |
+| 도구 제한 | frontmatter `tools:` 강제 적용 |
+| 턴 제한 | frontmatter `maxTurns:` 자동 적용 |
 
 ### 모델 라우팅 (frontmatter에 정의됨)
 
 | 티어 | 모델 | 에이전트 | 근거 |
 |------|------|----------|------|
 | Critical | opus | architect, code-reviewer | 아키텍처/보안 판단 정확도 |
-| Standard | inherit | frontend, backend, dba, ai-server, planner, designer, pm, integration-tester | 복잡한 구현/설계 |
+| Standard | inherit | frontend, backend, dba, ai-server, planner, designer, pm, sisyphus, integration-tester | 복잡한 구현/설계 |
 | Fast | haiku | researcher, analyst, unit-tester, executor | 탐색/실행 속도 |
 
 ### 컨텍스트 선별 기준
@@ -153,44 +323,52 @@ ${해당 에이전트의 output-contracts 포맷}
 
 ---
 
-## 워크플로우 상세
+## 검증 실패 처리
 
-### autopilot 전체 흐름
+검증 에이전트가 실패를 보고한 경우, 수정 → 재검증 사이클을 실행합니다.
 
-```
-Phase 0 (선택): [pm] PRD → .claude/memory/artifacts/prd.md
-Phase 1: [researcher] + [analyst] 병렬 → codebase.md, requirements.md
-Phase 2: [planner] + [designer] → plans/current.md, design-spec.md
-Phase 3: [dba] → [frontend|backend|ai] 병렬 → 코드 구현
-Phase 4: [unit-tester] → [code-reviewer] → [architect] → PASS/FAIL
-Phase 5: 완료 → project-state.md 갱신, workflow-state.md 삭제
-```
-
-### 피드백 루프
+### unit-tester 실패
 
 ```
-[code-reviewer] Critical 발견
-  → 피드백 추출 (파일:라인, 문제, 수정안)
-  → 구현 에이전트 재호출 (피드백 포함)
-  → 재검증
-  → 2회 FAIL → 사용자 보고
+1. 실패한 테스트와 대상 코드를 함께 확인
+2. 판단:
+   - 테스트가 잘못됨 → unit-tester 재호출
+   - 구현이 잘못됨 → 원래 구현 에이전트 재호출 + 실패 내용 컨텍스트
+3. 재호출 시 실패 메시지 포함:
+   "테스트 '{테스트명}' 실패. 기대값: {expected}, 실제값: {actual}"
+4. 수정 후 unit-tester 재실행으로 재검증
+```
 
-[architect] NEEDS_REVISION
-  → 피드백 추출 (권장사항, 승인 조건)
-  → [planner] 재호출 → 계획 수정 → 구현 재실행
-  → REJECTED → 사용자 보고
+### code-reviewer Critical 발견
+
+```
+1. Critical 항목의 파일:라인과 수정안 추출
+2. 원래 구현 에이전트 재호출 + 리뷰 피드백을 컨텍스트에 포함
+3. 수정 후 unit-tester → code-reviewer 재실행
+4. 2회 연속 같은 Critical → 사용자 보고
+```
+
+### architect NEEDS_REVISION
+
+```
+1. architect의 승인 조건 / 권장사항 추출
+2. planner 재호출 + 아키텍처 피드백:
+   "architect가 다음 수정을 요청했습니다: {권장사항}"
+3. 수정된 계획으로 구현 에이전트 재실행
+4. REJECTED → 사용자 보고
+```
+
+### 공통 규칙
+
+```
+- 재호출 시 반드시 이전 실패 컨텍스트를 포함
+- 2회 연속 실패 → 사용자 보고 + 개입 요청
+- 재시도는 workflow-state.md 재시도 카운터에 기록
+- Critical 보안 이슈는 즉시 중단 + 보고
+- 피드백 루프 3회 초과 → 사용자 보고
 ```
 
 실패 유형별 상세: `.claude/references/error-recovery.md`
-
-### Phase별 Git Checkpoint
-
-```
-Phase 완료 → git add + git commit "[autopilot] Phase N: {요약}"
-Phase 실패 → git restore로 롤백 가능
-```
-
-체크포인트 커밋 해시를 workflow-state.md 롤백 포인트에 기록.
 
 ---
 
@@ -263,6 +441,30 @@ planner가 작업 계획 시 **에이전트별 파일 영향 범위를 반드시
 
 ---
 
+## 워크플로우 상태 관리
+
+포맷: `.claude/references/output-contracts.md`의 workflow-state 섹션.
+
+### 생성 조건
+
+```
+에이전트 2개 이상 실행 시 → workflow-state.md 생성
+단일 에이전트 또는 직접 실행 → 생성하지 않음
+```
+
+### 상태 기록 시점
+
+```
+디스패치 시작      → workflow-state.md 생성 (태스크 그래프 포함)
+에이전트 실행      → task_id 기록, 상태: 🔄 실행중
+에이전트 완료      → 상태: ✅ 완료, git checkpoint 해시 기록
+에이전트 실패      → 상태: ❌ 실패, 재시도 카운터 증가
+후속 에이전트 실행  → 의존성 해소 후 즉시 실행, task_id 기록
+전체 완료          → workflow-state.md 삭제 또는 완료 표시
+```
+
+---
+
 ## 스킬 매칭 절차
 
 ```
@@ -304,47 +506,12 @@ planner가 작업 계획 시 **에이전트별 파일 영향 범위를 반드시
 
 ---
 
-## 워크플로우 상태 관리
-
-포맷: `.claude/references/output-contracts.md`의 workflow-state 섹션.
-
-### 생성 조건
-
-| 명령 | 생성 | 조건 |
-|------|------|------|
-| autopilot | ✅ | 다단계 워크플로우 |
-| compose | ✅ | 에이전트 파이프라인 |
-| parallel | ✅ | 병렬 에이전트 실행 |
-| 단일 에이전트 | ❌ | - |
-| 직접 실행 | ❌ | - |
-
-### 상태 기록 시점
-
-```
-워크플로우 시작     → 생성
-Phase 전환         → Phase 상태 + git checkpoint
-에이전트 호출      → 호출 기록 추가
-피드백 루프 진입   → 재시도 카운터 증가
-워크플로우 종료    → 삭제 또는 완료 표시
-```
-
----
-
 ## 에이전트 지연 로딩
 
 네이티브 서브에이전트는 `Task({ subagent_type: "{name}" })` 호출 시 **자동으로 로드**됩니다.
 오케스트레이터가 수동으로 에이전트 프롬프트를 읽을 필요가 없습니다.
 
-### Phase별 호출 대상
-
-| Phase | 호출 대상 | 비고 |
-|-------|----------|------|
-| Phase 0 | 없음 | 초기화는 오케스트레이터 직접 처리 |
-| Phase 1 | researcher, analyst | 병렬 호출 |
-| Phase 1.5 | 없음 | 오케스트레이터가 직접 결정 잠금 |
-| Phase 2 | planner, designer | UI 작업 포함 시 병렬 |
-| Phase 3 | dba, frontend, backend, ai-server | 필요한 것만, 의존성 순서 |
-| Phase 4 | unit-tester, code-reviewer | 순차 실행 |
+태스크 그래프에서 의존성이 해소된 에이전트만 실행하므로, 불필요한 에이전트를 미리 로드하지 않습니다.
 
 ---
 
@@ -393,71 +560,6 @@ Step 3: (필요 시) Read(".claude/memory/decisions/code-review.md")
 
 ---
 
-## 결정 잠금 단계 (Phase 1.5)
-
-분석(Phase 1)과 설계(Phase 2) 사이에 **핵심 결정을 확정**하는 단계입니다.
-설계/구현 중 방향 전환을 방지합니다.
-
-### autopilot 워크플로우 (수정)
-
-```
-Phase 1:   분석     → [researcher] + [analyst] (병렬)
-Phase 1.5: 결정 잠금 → 오케스트레이터가 사용자와 확인
-Phase 2:   설계     → [planner] + [designer]
-Phase 3:   구현     → [dba] → [frontend|backend|ai] (병렬)
-Phase 4:   검증     → [unit-tester] → [code-reviewer]
-```
-
-### 결정 잠금 절차
-
-```
-1. Phase 1 산출물에서 결정 필요 항목 추출:
-   - researcher → 기술적 선택지 (라이브러리, 패턴)
-   - analyst → 요구사항 우선순위, 엣지케이스 처리 방식
-
-2. 결정 항목 정리:
-   - 아키텍처 패턴 (MVC, 클린 아키텍처 등)
-   - 기술 선택 (ORM, 상태 관리, 인증 방식 등)
-   - 범위 확정 (Must/Should/Could 중 이번에 구현할 것)
-   - 비기능 요구사항 (성능 목표, 접근성 수준)
-
-3. AskUserQuestion으로 결정 확인:
-   - 선택지 + 각각의 트레이드오프 제시
-   - 오케스트레이터의 추천 포함
-
-4. 확정된 결정을 .claude/memory/decisions/locked-decisions.md에 기록
-
-5. planner에게 확정 결정을 컨텍스트로 전달
-```
-
-### locked-decisions.md 포맷
-
-```markdown
-# 결정 사항 (Phase 1.5)
-
-## 확정 결정
-| # | 결정 항목 | 선택 | 근거 |
-|---|----------|------|------|
-| 1 | 인증 방식 | JWT + HttpOnly Cookie | SPA 환경, 보안 우선 |
-| 2 | ORM | Prisma | 기존 프로젝트 컨벤션 |
-
-## 범위
-- Must: [확정 항목]
-- Deferred: [이번에 안 하는 것]
-
-## 제약
-- [합의된 기술적/시간적 제약]
-```
-
-### 스킵 조건
-
-다음 경우 Phase 1.5를 건너뜁니다:
-- 단순 버그 수정 (결정할 것 없음)
-- 이전 결정이 그대로 유효한 반복 작업
-- 사용자가 명시적으로 모든 결정을 지시한 경우
-
----
-
 ## Agent Teams를 이용한 병렬 실행 (opt-in)
 
 > 실험적 기능. 환경변수 `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` 필요.
@@ -488,9 +590,9 @@ Agent Teams는 여러 Claude Code 인스턴스가 **공유 태스크 리스트�
 ```
 1. 오케스트레이터가 Team Lead 역할
 2. 에이전트별 Teammate 생성 (서브에이전트 설정 상속)
-3. 공유 태스크 리스트에 Phase 3 작업 등록
+3. 공유 태스크 리스트에 태스크 그래프의 작업 등록
 4. Teammate들이 자율적으로 태스크 claim → 완료
-5. Lead가 결과 종합 → Phase 4로 진행
+5. Lead가 결과 종합 → 검증 에이전트 실행
 ```
 
 ### 제한사항
@@ -507,18 +609,18 @@ Agent Teams는 여러 Claude Code 인스턴스가 **공유 태스크 리스트�
 ### 개요
 
 `ralph` 명령은 sisyphus 에이전트를 반복 호출하여 작업이 완료될 때까지 실행합니다.
-autopilot이 14개 전문 에이전트를 조율하는 반면, ralph은 **단일 자율 에이전트를 반복 실행**합니다.
+Dynamic Dispatch가 복수 전문 에이전트를 조율하는 반면, ralph은 **단일 자율 에이전트를 반복 실행**합니다.
 
-### autopilot vs ralph 사용 기준
+### Dynamic Dispatch vs ralph 사용 기준
 
 | 상황 | 권장 | 이유 |
 |------|------|------|
-| 대규모 신규 기능 (PRD, 설계, DB, UI, API) | autopilot | 전문 에이전트 깊이 필요 |
+| 대규모 신규 기능 (PRD, 설계, DB, UI, API) | 일반 요청 | 전문 에이전트 깊이 필요 |
 | 중간 규모 기능/리팩토링 | ralph | 빠른 반복, 단일 컨텍스트 효율 |
 | 버그 수정, 성능 개선 | ralph | 집중 반복 적합 |
 | 세션 간 연속 작업 필요 | ralph | loop-state 영속화 |
-| UI/UX 디자인이 중요 | autopilot | designer 에이전트 활용 |
-| 아키텍처 검토 필수 | autopilot | architect(opus) 활용 |
+| UI/UX 디자인이 중요 | 일반 요청 | designer 에이전트 활용 |
+| 아키텍처 검토 필수 | 일반 요청 | architect(opus) 활용 |
 | "될 때까지" 완료 보장 필요 | ralph | 자동 반복 |
 
 ### 루프 관리 규칙

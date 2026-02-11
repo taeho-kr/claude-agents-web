@@ -177,16 +177,16 @@ ralph --resume
 
 ---
 
-## autopilot vs ralph 선택 기준
+## Dynamic Dispatch vs ralph 선택 기준
 
 | 상황 | 권장 | 이유 |
 |------|------|------|
-| 대규모 신규 기능 (PRD, 설계, DB, UI, API) | autopilot | 전문 에이전트 깊이 필요 |
+| 대규모 신규 기능 (PRD, 설계, DB, UI, API) | 일반 요청 | 전문 에이전트 깊이 필요 |
 | 중간 규모 기능/리팩토링 | ralph | 빠른 반복, 단일 컨텍스트 효율 |
 | 버그 수정, 성능 개선 | ralph | 집중 반복 적합 |
 | 세션 간 연속 작업 필요 | ralph | loop-state 영속화 |
-| UI/UX 디자인이 중요 | autopilot | designer 에이전트 활용 |
-| 아키텍처 검토 필수 | autopilot | architect(opus) 활용 |
+| UI/UX 디자인이 중요 | 일반 요청 | designer 에이전트 활용 |
+| 아키텍처 검토 필수 | 일반 요청 | architect(opus) 활용 |
 | "될 때까지" 완료 보장 필요 | ralph | 자동 반복 |
 
 ---

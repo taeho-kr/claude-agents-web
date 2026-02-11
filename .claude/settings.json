@@ -78,11 +78,6 @@
   "commands": {
     "directory": ".claude/commands",
     "available": [
-      "autopilot",
-      "compose",
-      "parallel",
-      "review",
-      "integration-test",
       "ralph"
     ]
   }

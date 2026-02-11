@@ -30,12 +30,71 @@ claude
 이후 실행부터는 초기화 과정 없이 바로 작업 가능합니다.
 
 ```bash
-# 명령 예시
-> autopilot 로그인 기능 구현해줘
-> compose researcher → planner → (frontend | backend) → unit-tester
-> parallel LoginForm 구현 | /auth/login API | users 테이블 생성
-> review src/api/
+# 자연어로 요청하면 오케스트레이터가 자동 처리
+> 로그인 기능 구현해줘
+> 코드 리뷰해줘
+> API 추가하고 테스트까지 작성해줘
+> ralph 버그 수정해줘    # 완료까지 반복 실행
 ```
+
+---
+
+## 3-Step Dynamic Dispatch
+
+모든 요청은 동일한 3단계 흐름으로 처리됩니다.
+사용자가 실행 방식을 선택할 필요 없이, 자연어로 요청하면 됩니다.
+
+```
+Step 1: 요청 분석
+  사용자 자연어 → 의도 파악 + 복잡도 판단
+
+Step 2: 에이전트 선택 + 태스크 그래프
+  최적 에이전트 선택 (복수 가능) → 의존성 DAG 생성
+  → 에이전트 3개+ 시 사용자 승인 요청
+
+Step 3: 백그라운드 실행 + 순환 모니터링
+  의존성 없는 에이전트부터 백그라운드 실행 →
+  round-robin 폴링 → 완료 시 후속 에이전트 실행 →
+  모든 에이전트 완료까지 반복
+```
+
+### 예시: "로그인 기능 구현해줘"
+
+```
+1. researcher + analyst (병렬 분석)
+2. planner (설계)
+3. dba (DB 스키마)
+4. frontend + backend (병렬 구현)
+5. unit-tester (테스트)
+6. code-reviewer (리뷰)
+```
+
+### ralph 워크플로우
+
+`ralph`은 유일한 별도 명령어입니다. sisyphus(자율 에이전트)를 반복 호출하여 "될 때까지" 실행합니다.
+
+```
+ralph [요청]
+  │
+  ├─ loop-state.md 생성
+  ├─ Persistent Context 로드
+  │
+  └─ 반복 (max 50회)
+       │
+       ├─ [sisyphus] 호출 (분석→설계→구현→검증 올인원)
+       ├─ 결과 평가 + loop-state.md 업데이트
+       ├─ git commit "[ralph] iteration N: 요약"
+       │
+       ├─ ✅ 완료 → 성공 종료
+       ├─ ❌ 3회 연속 동일 실패 → 자동 중단
+       └─ ⚠️ 미완료 → 다음 반복
+```
+
+| 상황 | 권장 | 이유 |
+|------|------|------|
+| 대규모 신규 기능 | 일반 요청 | 전문 에이전트 깊이 필요 |
+| 중간 규모 기능/버그 수정 | ralph | 빠른 반복, 완료 보장 |
+| 세션 간 연속 작업 | ralph | loop-state 영속화 |
 
 ---
 
@@ -50,12 +109,7 @@ your-project/
     ├── agents/              # 15개 네이티브 서브에이전트 (YAML frontmatter)
     │   ├── _template.md     #   새 에이전트 템플릿
     │   └── {name}.md        #   개별 에이전트 (name, tools, model, skills 정의)
-    ├── commands/            # 6개 명령어
-    │   ├── autopilot.md     #   전체 자동 실행
-    │   ├── compose.md       #   자유 파이프라인
-    │   ├── parallel.md      #   병렬 실행
-    │   ├── review.md        #   코드/아키텍처 리뷰
-    │   ├── integration-test.md
+    ├── commands/            # 명령어
     │   └── ralph.md         #   영속 루프 실행
     ├── skills/              # 재사용 패턴 + 에이전트 공통 규칙
     │   ├── agent-common.md  #   에이전트 공통 규칙 (자동 주입)
@@ -78,53 +132,6 @@ your-project/
         ├── artifacts/       #   산출물
         └── reports/         #   분석 보고서
 ```
-
----
-
-## 명령어
-
-| 명령어 | 설명 | 예시 |
-|--------|------|------|
-| `autopilot` | 전체 워크플로우 자동 실행 | `autopilot 로그인 기능 구현해줘` |
-| `compose` | 에이전트 자유 조합 파이프라인 | `compose researcher → (frontend \| backend)` |
-| `parallel` | 독립 작업 병렬 실행 | `parallel 작업1 \| 작업2 \| 작업3` |
-| `review` | 코드/아키텍처 리뷰 | `review src/api/` |
-| `integration-test` | 통합/E2E 테스트 | `integration-test` |
-| `ralph` | 영속 루프 실행 (완료까지 반복) | `ralph 로그인 기능 구현해줘` |
-
-### autopilot 워크플로우
-
-```
-Phase 1:   분석     → [researcher] + [analyst] (병렬)
-Phase 1.5: 결정 잠금 → 오케스트레이터 ↔ 사용자 (기술/범위 확정)
-Phase 2:   설계     → [planner] + [designer]
-Phase 3:   구현     → [dba] → [frontend | backend] (병렬)
-Phase 4:   검증     → [unit-tester] → [code-reviewer]
-                     → FAIL → 피드백 루프 (최대 3회) → PASS → 완료
-```
-
-각 Phase 완료 시 git checkpoint 자동 생성. 실패 시 롤백 가능.
-
-### ralph 워크플로우
-
-```
-ralph [요청]
-  │
-  ├─ loop-state.md 생성
-  ├─ Persistent Context 로드
-  │
-  └─ 반복 (max 50회)
-       │
-       ├─ [sisyphus] 호출 (분석→설계→구현→검증 올인원)
-       ├─ 결과 평가 + loop-state.md 업데이트
-       ├─ git commit "[ralph] iteration N: 요약"
-       │
-       ├─ ✅ 완료 → 성공 종료
-       ├─ ❌ 3회 연속 동일 실패 → 자동 중단
-       └─ ⚠️ 미완료 → 다음 반복
-```
-
-autopilot은 대규모 신규 기능, ralph은 중간 규모 기능/버그 수정/리팩토링에 적합.
 
 ---
 
@@ -182,12 +189,12 @@ Agent Teams로 공유 태스크 리스트 기반 자율 협업이 가능합니�
 
 | 장치 | 설명 |
 |------|------|
-| workflow-state.md | Phase 진행, 재시도 카운터, 호출 수 추적 |
-| git checkpoint | Phase별 자동 커밋, 실패 시 롤백 |
+| workflow-state.md | 태스크 그래프 상태, 재시도 카운터, 호출 수 추적 |
+| git checkpoint | 에이전트 완료 시 자동 커밋, 실패 시 롤백 |
 | max_turns | 분석:15, 구현:25, 검증:10 |
 | 비용 가드 | 총 에이전트 15회, 피드백 루프 3회 한도 |
 | 병렬 안전 | 에이전트별 파일 범위 명시, 공유 파일 순차 |
-| 드리프트 감지 | 세션 시작 시 PM vs 실제 코드 비교 |
+| 드리프트 감지 | 세션 시작 시 tech-stack.md vs 실제 코드 비교 |
 
 ---
 
